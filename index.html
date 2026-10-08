@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>星屑群岛 Stardust Isles</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div id="ui">
+    <div id="dark-vignette"></div>
+    <div id="hud" hidden>
+      <div id="counters">
+        <div class="ctr" id="c-shard"><span class="ico">⭐</span><b>0</b><i>/30</i></div>
+        <div class="ctr" id="c-feather"><span class="ico">🪶</span><b>0</b><i>/15</i></div>
+        <div class="ctr" id="c-coin"><span class="ico">🐚</span><b>0</b></div>
+      </div>
+      <div id="clock"><span id="clock-icon">☀️</span><span id="clock-text">08:00</span><span id="weather"></span></div>
+      <div id="compass" hidden><div id="compass-arrow">➤</div><div id="compass-dist"></div></div>
+      <div id="region-banner"></div>
+      <svg id="stamina" width="54" height="54" viewBox="0 0 54 54" hidden>
+        <circle cx="27" cy="27" r="22" class="bg"/><circle cx="27" cy="27" r="22" class="fg" id="stamina-fg"/>
+      </svg>
+      <div id="prompt" hidden><kbd>E</kbd><span></span></div>
+      <div id="race-hud" hidden><div id="race-title"></div><div id="race-time"></div></div>
+      <div id="keys-hint">WASD 移动 · 空格 跳跃 · Shift 冲刺 · E 互动 · Tab 菜单 · 点击画面锁定视角</div>
+      <div id="tools-hint"></div>
+    </div>
+    <div id="toasts"></div>
+    <div id="big-banner"><div class="t1"></div><div class="t2"></div></div>
+    <div id="viewfinder" hidden>
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="vf-hint">左键 拍照 · 滚轮 变焦 · C 退出</div>
+    </div>
+    <div id="flash"></div>
+    <div id="dialog" hidden>
+      <div class="name"></div>
+      <div class="text"></div>
+      <div class="choices"></div>
+      <div class="chat" hidden><input type="text" maxlength="120" placeholder="想说什么？（回车发送，Esc 结束）"/></div>
+      <div class="next">▼</div>
+    </div>
+    <div id="fishing" hidden>
+      <div class="fish-title"></div>
+      <div class="bar"><div class="zone"></div><div class="cursor"></div></div>
+      <div class="fish-hint"></div>
+    </div>
+    <div id="menu" hidden>
+      <div class="menu-box">
+        <div class="tabs"></div>
+        <div class="tab-body"></div>
+        <div class="menu-foot">Tab / Esc 关闭</div>
+      </div>
+    </div>
+    <div id="title">
+      <div class="title-inner">
+        <div class="logo">星屑群岛</div>
+        <div class="sub">Stardust Isles</div>
+        <div class="loading" id="loading">正在生成群岛… <span id="load-pct">0%</span></div>
+        <div class="buttons" hidden>
+          <button id="btn-continue" hidden>继续旅程</button>
+          <button id="btn-new">新的旅程</button>
+        </div>
+        <div class="credits">一款探索收集小游戏 · 所有模型、音乐和音效均由代码生成</div>
+      </div>
+    </div>
+    <div id="fade"></div>
+    <div id="ending" hidden></div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
