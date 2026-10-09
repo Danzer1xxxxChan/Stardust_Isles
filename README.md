@@ -1,83 +1,97 @@
-# 星屑群岛 Stardust Isles
+# ✨ Stardust Isles
 
-一款可以在浏览器里玩的 3D 探索收集小游戏。流星雨打碎了雪山顶灯塔里的星核，玩家在群岛上收集星屑、解锁能力、帮助居民，最后登顶点亮灯塔。
+![Stardust Isles](docs/images/title.jpg)
 
-所有 3D 模型、地形、音乐和音效都由代码生成，没有任何外部素材文件。
+**Stardust Isles** is a cozy 3D exploration and collection game that runs in your browser. A meteor shower has shattered the star in the lighthouse on top of Frostpeak, and its pieces, the *stardust shards*, are scattered across the islands. Explore, help the islanders, unlock new abilities and gather 20 shards to relight the lighthouse. Beyond the coast lies an endless, procedurally generated archipelago full of treasure and danger.
 
-## 运行
+Everything is made in code with [Three.js](https://threejs.org/): there are **no asset files**. Models, terrain, textures, particle effects, music and sound effects are all generated at runtime. The game is playable in **English and Chinese (中文)**.
+
+<p align="center"><img src="docs/images/combat.gif" width="640" alt="Combat"></p>
+
+| | |
+|---|---|
+| ![Dialog](docs/images/dialog.jpg) | ![Gliding](docs/images/glide.jpg) |
+| ![Far Isles](docs/images/farisles.jpg) | ![Crystal Golem](docs/images/golem.jpg) |
+| ![Fast travel](docs/images/travel.jpg) | ![Day and night](docs/images/timelapse.jpg) |
+
+## ⚙️ Setup
+
+You need [Node.js](https://nodejs.org/) 18 or newer and a browser with WebGL 2. A dedicated GPU is recommended for the higher graphics presets.
 
 ```bash
+git clone https://github.com/Danzer1xxxxChan/Stardust_Isles.git
+cd Stardust_Isles
 npm install
 npm run build
-npm start                 # http://localhost:8080 （PORT=xxxx 可改端口）
+npm start              # open http://localhost:8080
 ```
 
-开发模式：`npm run dev`（Vite 热更新，端口 5173；`/api` 会代理到 `npm start` 的服务）。
+- **Port**: `PORT=3000 npm start`
+- **Dev mode with hot reload**: `npm run dev` (port 5173)
+- **Remote server**: forward the port with `ssh -L 8080:localhost:8080 <server>`, then open it locally
+- **Language**: use the 中文 / English buttons on the title screen, or *Settings → Language*
+- **Graphics**: *Settings → Graphics* (Low / Medium / High / Ultra)
+- **Optional AI small talk with the residents**: `ANTHROPIC_API_KEY=... npm start` (set `AI_MODEL=...` to choose a model). Without a key the game works exactly the same; the "Just chat" option is simply hidden.
 
-在远程服务器上运行时，用 ssh 端口转发在本机浏览器打开：`ssh -L 8080:localhost:8080 <server>`。
+Progress is saved automatically in the browser (localStorage).
 
-### 可选：AI 闲聊
+## 🎮 Controls
 
-设置 `ANTHROPIC_API_KEY` 后启动服务端，和居民对话时会多出「随便聊聊」选项。
-
-```bash
-ANTHROPIC_API_KEY=... npm start          # 默认模型 claude-opus-5-5，AI_MODEL=... 可替换
-```
-
-没有 Key 时游戏完全正常，只是不显示这个选项。
-
-## 操作
-
-| 按键 | 作用 |
+| Key | Action |
 |---|---|
-| WASD / 方向键 | 移动（朝陡坡走会自动攀爬，消耗体力） |
-| 鼠标 | 转动视角（点击画面锁定，或按住右键拖动），滚轮缩放 |
-| 空格 | 跳跃；空中再按：二段跳（弹跳靴）/ 展开滑翔翼（按住） |
-| Shift | 冲刺 / 快速游泳 |
-| E | 互动（对话、开箱、钓鱼、营火、转镜子……） |
-| C | 相机（拍照登记图鉴） |
-| Tab / M / Esc | 菜单 / 地图 / 暂停 |
+| WASD / arrow keys | Move (walk into a steep slope to climb) |
+| Mouse | Look around (click to lock, or drag with the right button) · wheel to zoom |
+| Space | Jump · in mid-air: double jump / open the glider (hold) |
+| Shift | Sprint / swim faster |
+| Left click / J | Attack (3-hit combo, plunge attack in mid-air) |
+| Q | Dodge roll (brief invulnerability) |
+| E | Interact: talk, open chests, fish, light campfires… |
+| C | Camera (photograph things for the field guide) |
+| Tab / M / Esc | Menu / map / pause |
 
-## 内容
+## 🗺️ What's in the game
 
-- **6 个区域**：晨风草原与村庄、迷雾森林、红岩峡谷、珊瑚海岸、水晶湖、霜顶雪山。
-- **能力解锁**：相机、滑翔翼、提灯、钓竿、脚蹼、铲子、弹跳靴、星屑罗盘。每种能力都会打开新的区域或玩法。
-- **收集物**：30 颗星屑（集齐 20 颗可以点亮灯塔）、15 根金羽毛（提升体力上限，决定能爬多高）、约 300 枚贝壳币、10 个宝箱、8 顶帽子、41 条图鉴。
-- **9 位居民，各有任务**：找羊、采蘑菇、钓鱼课、峡谷赛跑、星座石台、送热可可等。
-- **星屑的获得方式**：平台跳跃、滑翔穿光环（含上升气流）、推箱子谜题、光束镜子谜题、追踪星光狐、夜晚限定的星座和萤火虫、藏宝图挖宝、钓到金鳞鱼、图鉴奖励。
-- **系统**：
-  - 昼夜循环（游戏里一天约 8 分钟）和下雨天气，部分动物和谜题只在特定时间或天气出现
-  - 营火可以休息和快速旅行
-  - 地图带战争迷雾
-  - 自动存档（浏览器 localStorage）
-  - 生成式背景音乐和环境音效
+**A hand-crafted island…** Six regions: Breezy Meadows and the village, Misty Woods, Red Rock Canyon, Coral Coast, Crystal Lake and the snowy Frostpeak. There is a day/night cycle (one day lasts about 8 minutes) and rain, and some creatures and puzzles only appear at night or in the rain.
 
-## AI 元素的评估
+**…and the endless Far Isles.** Walk out along a sandbar causeway, swim or glide past the coast, and the world keeps generating as you go. You will find five biomes (Verdant Isles, Fogwood Sea, Redrock Badlands, Frost Plains and Crystal Shores), each with its own terrain, plants and wildlife. The farther you travel, the stronger the enemies and the richer the chests.
 
-| 方案 | 结论 |
-|---|---|
-| 实时生成关卡、任务或奖励 | ❌ 不采用。生成结果不可控，会破坏能力解锁的节奏和数值平衡，而且延迟很高。 |
-| 与居民自由闲聊、讨要提示 | ✅ 作为可选功能实现。 |
-| 开发期用 AI 写对话和内容 | ✅ 已采用。所有剧情台词都是固定脚本，保证质量和一致性。 |
+**Progression.** 30 stardust shards (20 relight the lighthouse), 15 golden feathers that raise your climbing stamina, about 300 shell coins, chests, 8 hats and a 41-entry field guide. Eight abilities open up new places and ways to play: camera, glider, lantern, fishing rod, flippers, shovel, bounce boots and a stardust compass.
 
-自由闲聊的实现细节：
+**Residents and quests.** Nine islanders, each with a story and a request: find lost sheep, gather glowing mushrooms, take a fishing lesson, race through the canyon, read the stars, bring hot cocoa to a freezing climber, and more.
 
-- **服务端掌握人设和 API Key**：客户端只发送 NPC 编号、最近几轮对话和一份游戏状态摘要（未完成的目标），没法注入系统提示词。
-- **回答依据真实进度**：模型根据真实的游戏进度给提示，并且被要求不编造物品、不承诺奖励。它也没有任何改动游戏状态的能力。
-- **主线不依赖 AI**：主线流程完全不依赖它。开销方面，每次回复大约几百个 token，用低 effort、系统提示词做了缓存，并开启了服务端兜底。
+**Puzzles and challenges.** Platforming, glide-ring courses with updrafts, pushing stone blocks, aiming light beams with mirrors, night-only constellation altars, chasing a starlight fox, digging with treasure maps, and a fishing minigame.
 
-## 代码结构
+**Combat.** Sword combos, plunge attacks and dodge rolls with hit-stop, sword trails and damage numbers. Your enemies are the *Gloom*: slimes, shade wolves and the elite Crystal Golem. Wildlife has health bars too, and fainted animals turn into starlight and come back later. If you fall, you wake up at the nearest campfire.
+
+**Systems.** Campfires for resting and fast travel, a fog-of-war map, a photo field guide, a wardrobe, autosave, and generative music and ambience.
+
+**Graphics.** Bloom, ambient occlusion, color grading and anti-aliasing; procedural clouds; stylized water with reflections, foam and caustics; around 90,000 blades of wind-blown grass; swaying vegetation; rim-lit characters; and ambient particles such as pollen, fireflies and snow.
+
+## 🧰 Project layout
 
 ```
 src/
-  world/     地形（高度场+分区混合）、程序化模型、植被散布、建筑、天空昼夜、水面、碰撞
-  player/    角色模型与动画、控制器（走/跑/跳/滑翔/攀爬/滑落/游泳）、跟随相机
-  game/      状态与存档、内容数据、收集物、居民与对话脚本、挑战与谜题、钓鱼、拍照、动物、任务
-  ui/        HUD、对话框、菜单与地图
-  audio/     合成音效、生成式音乐、环境声
-  ai/        AI 闲聊客户端
-server/      生产服务器（静态文件 + /api/npc-chat）
-tools/       functest.mjs（无头浏览器功能测试）、smoke.mjs（截图巡游）、probe.mjs（地形检查）
+  world/    terrain & far-isle streaming, vegetation, grass, sky, water, structures
+  player/   character models & animation, controller, camera
+  game/     quests, residents, challenges, combat & enemies, fishing, photos, save state
+  render/   post-processing & graphics presets
+  ui/       HUD, dialog, menus & map
+  audio/    synthesized SFX, generative music, ambience
+  i18n/     English string tables (Chinese source strings are the keys)
+server/     static server + optional AI chat endpoint
+tools/      headless tests, screenshot tours, i18n checks, promo-video recorder
 ```
 
-测试：先 `npm start`，再运行 `node tools/functest.mjs http://localhost:8080/`。脚本会在无头 Chromium 里模拟按键，跑完 19 项玩法检查。
+**Testing** (start the server first with `npm start`):
+
+```bash
+npm test               # 19 gameplay checks in headless Chromium
+npm run test:combat    # combat and far-isle checks
+npm run i18n:check     # find untranslated strings
+```
+
+`tools/promo/` records the trailer frame by frame. The game itself performs the shots, and a virtual clock keeps the timing exact (see [docs/README.zh-CN.md](docs/README.zh-CN.md) for details).
+
+---
+
+📖 [中文说明 (Chinese README)](docs/README.zh-CN.md) · 📝 [Design notes (Chinese)](docs/UPGRADE_PLAN.md)

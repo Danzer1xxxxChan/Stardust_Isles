@@ -36,8 +36,11 @@ const PERSONAS = {
   feng: '你是登山者阿峰，冻得哆哆嗦嗦但很乐观的登山爱好者，熟悉雪山的攀登技巧。',
 };
 
-function systemPrompt(npc) {
-  return `${WORLD}\n\n${PERSONAS[npc]}\n\n${RULES}`;
+// English build: same personas, but answer in English with the names used by the English UI.
+const EN_RULE = `Language: the player is using the English version of the game. Always reply in natural, friendly English (1-3 sentences, at most 50 words), staying in character. Use these English names: 星屑群岛 = Stardust Isles, 星屑 = stardust shards, 金羽毛 = golden feathers, 贝壳币 = shell coins, 艾拉奶奶 = Granny Aila, 皮普博士 = Dr. Pip, 货郎阿贝 = Abe the Peddler, 牧羊人米娅 = Mia the Shepherd, 渔夫老海 = Old Hai, 采菇人菇菇 = Kuku the Forager, 跳跳 = Hops, 天文学家星野 = Hoshino the Astronomer, 登山者阿峰 = Feng the Climber, 晨风草原 = Breezy Meadows, 迷雾森林 = Misty Woods, 红岩峡谷 = Red Rock Canyon, 珊瑚海岸 = Coral Coast, 水晶湖 = Crystal Lake, 霜顶雪山 = Frostpeak, 灯塔 = the lighthouse.`;
+
+function systemPrompt(npc, lang) {
+  return `${WORLD}\n\n${PERSONAS[npc]}\n\n${RULES}${lang === 'en' ? '\n\n' + EN_RULE : ''}`;
 }
 
 function contextText(c = {}) {
@@ -53,6 +56,7 @@ ${s(c.objectives, 1500) || '（无）'}`;
 
 async function npcChat(body) {
   const npc = String(body.npc || '');
+  const lang = body.lang === 'en' ? 'en' : 'zh';
   if (!PERSONAS[npc]) return { status: 400, json: { error: 'unknown npc' } };
   const message = String(body.message || '').slice(0, 200);
   if (!message) return { status: 400, json: { error: 'empty' } };
@@ -62,7 +66,7 @@ async function npcChat(body) {
     .map((m) => ({ role: m.role, content: m.content.slice(0, 400) }));
   const messages = [
     ...history,
-    { role: 'user', content: `${contextText(body.context)}\n\n玩家对你说：${message}` },
+    { role: 'user', content: `${contextText(body.context)}\n\n${lang === 'en' ? 'The player says to you (reply in English): ' : '玩家对你说：'}${message}` },
   ];
   try {
     const response = await client.beta.messages.create({
@@ -71,10 +75,10 @@ async function npcChat(body) {
       output_config: { effort: 'low' },
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
-      system: [{ type: 'text', text: systemPrompt(npc), cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: systemPrompt(npc, lang), cache_control: { type: 'ephemeral' } }],
       messages,
     });
-    if (response.stop_reason === 'refusal') return { status: 200, json: { reply: '嗯……这个我可不太想聊。说点岛上的事吧？' } };
+    if (response.stop_reason === 'refusal') return { status: 200, json: { reply: lang === 'en' ? "Hmm... I'd rather not talk about that. Tell me about the island instead?" : '嗯……这个我可不太想聊。说点岛上的事吧？' } };
     const text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('').trim();
     return { status: 200, json: { reply: text.slice(0, 300) || '……' } };
   } catch (error) {

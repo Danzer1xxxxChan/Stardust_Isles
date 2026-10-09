@@ -4,6 +4,7 @@ import { part, build, prim, propMaterial } from '../world/props.js';
 import { resolveAnchor } from '../world/world.js';
 import { groundHeight } from '../world/terrain.js';
 import { SHARD_TOTAL, LIGHTHOUSE_COST, HATS } from './content.js';
+import { t as tr } from '../i18n.js';
 
 const { Cyl, Cone, Box, Ico } = prim;
 
@@ -105,7 +106,7 @@ export class Collectibles {
       this.chests.push(ch);
       game.interact.add({
         pos: { x: def.x, y, z: def.z }, radius: 2.2,
-        label: () => (ch.opened ? null : '打开宝箱'),
+        label: () => (ch.opened ? null : tr('打开宝箱')),
         action: () => this.openChest(ch),
       });
       game.world.colliders.addBox(def.x, def.z, 0.55, 0.4, y, y + 0.9, grp.rotation.y, { walkable: true });
@@ -126,7 +127,7 @@ export class Collectibles {
         label: () => {
           const d = state.data;
           if (d.dug.includes(dg.id) || !d.maps.includes(dg.map)) return null;
-          return d.abilities.shovel ? '挖掘' : null;
+          return d.abilities.shovel ? tr('挖掘') : null;
         },
         action: async () => {
           state.add('dug', dg.id);
@@ -136,7 +137,7 @@ export class Collectibles {
           await game.wait(0.6);
           game.player.animOverride = null;
           this.spawnShard(dg.id, { x: dg.x, y: dg.y + 1.4, z: dg.z });
-          game.hud.toast('挖到宝藏了！');
+          game.hud.toast(tr('挖到宝藏了！'));
         },
       });
     }
@@ -188,12 +189,12 @@ export class Collectibles {
     if (!s.add('shards', id)) return;
     const n = s.data.shards.length;
     g.audio.play('shard');
-    g.hud.banner('获得星屑！', `${n} / ${SHARD_TOTAL}`);
-    if (n === 3 && !s.data.abilities.glider) setTimeout(() => g.hud.toast('已经有 3 颗星屑了，回村里找艾拉奶奶吧！', 4000), 2600);
-    if (n === LIGHTHOUSE_COST) setTimeout(() => g.hud.toast('星屑够了！去霜顶雪山顶点亮灯塔吧！', 5000), 2600);
+    g.hud.banner(tr('获得星屑！'), `${n} / ${SHARD_TOTAL}`);
+    if (n === 3 && !s.data.abilities.glider) setTimeout(() => g.hud.toast(tr('已经有 3 颗星屑了，回村里找艾拉奶奶吧！'), 4000), 2600);
+    if (n === LIGHTHOUSE_COST) setTimeout(() => g.hud.toast(tr('星屑够了！去霜顶雪山顶点亮灯塔吧！'), 5000), 2600);
     if (n === SHARD_TOTAL && !s.data.hats.includes('crown')) {
       s.add('hats', 'crown');
-      setTimeout(() => g.hud.banner('全部星屑收集完成！', '获得了「星之王冠」，去菜单的装扮里戴上吧', 4500), 3000);
+      setTimeout(() => g.hud.banner(tr('全部星屑收集完成！'), tr('获得了「星之王冠」，去菜单的装扮里戴上吧'), 4500), 3000);
     }
     s.save();
   }
@@ -203,7 +204,7 @@ export class Collectibles {
     if (!s.add('feathers', id)) return;
     g.audio.play('feather');
     g.player.stamina = g.player.maxStamina;
-    g.hud.banner('获得金羽毛！', `体力上限提升 · ${s.data.feathers.length} / 15`);
+    g.hud.banner(tr('获得金羽毛！'), tr('体力上限提升 · {0} / 15', [s.data.feathers.length]));
     s.save();
   }
 
@@ -219,12 +220,12 @@ export class Collectibles {
     });
     const p = ch.grp.position;
     g.fx.emit(p.x, p.y + 0.8, p.z, 40, { color: 0xffd84a, speed: 4, gravity: 3 });
-    if (r.coins) { s.addCoins(r.coins); g.hud.banner(`获得 ${r.coins} 枚贝壳币`, ''); g.audio.play('coin'); }
-    if (r.hat) { s.add('hats', r.hat); g.hud.banner(`获得帽子：${HATS[r.hat]}`, '在菜单的「装扮」里可以戴上'); }
+    if (r.coins) { s.addCoins(r.coins); g.hud.banner(tr('获得 {0} 枚贝壳币', [r.coins]), ''); g.audio.play('coin'); }
+    if (r.hat) { s.add('hats', r.hat); g.hud.banner(tr('获得帽子：{0}', [HATS[r.hat]]), tr('在菜单的「装扮」里可以戴上')); }
     if (r.map) {
       s.add('maps', r.map);
       const dg = g.content.digs.find((d) => d.map === r.map);
-      g.hud.banner('获得藏宝图！', s.data.abilities.shovel ? '去地图上标记的地方挖宝吧' : '需要一把铲子才能挖宝（阿贝的店里有卖）', 4000);
+      g.hud.banner(tr('获得藏宝图！'), s.data.abilities.shovel ? tr('去地图上标记的地方挖宝吧') : tr('需要一把铲子才能挖宝（阿贝的店里有卖）'), 4000);
       setTimeout(() => g.hud.toast(dg.clue, 6000), 1500);
     }
     s.save();
@@ -283,7 +284,7 @@ export class Collectibles {
         d.items.mushrooms++;
         g.audio.play('feather');
         g.fx.emit(m.x, m.y + 0.4, m.z, 20, { color: 0x6ff7ff, speed: 3 });
-        g.hud.toast(`发光蘑菇 ${d.items.mushrooms}/5`);
+        g.hud.toast(tr('发光蘑菇 {0}/5', [d.items.mushrooms]));
       }
     }
     // Sparkle hint near dig spots when you own the map

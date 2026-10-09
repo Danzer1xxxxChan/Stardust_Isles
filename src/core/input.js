@@ -6,7 +6,7 @@ export class Input {
     this.down = new Set();
     this.pressed = new Set();
     this._pending = new Set();
-    this.mouseDX = 0; this.mouseDY = 0; this.wheel = 0; this.clicked = false;
+    this.mouseDX = 0; this.mouseDY = 0; this.wheel = 0; this.clicked = false; this.attackClick = false; this._atk = false;
     this._dx = 0; this._dy = 0; this._wheel = 0; this._click = false;
     this.enabled = true;
     this.locked = false;
@@ -21,6 +21,7 @@ export class Input {
     addEventListener('blur', () => this.down.clear());
     canvas.addEventListener('mousedown', (e) => {
       if (e.button === 0) this._click = true;
+      if (e.button === 0 && this.locked) this._atk = true;
       if (this.wantLock && !this.locked && e.button === 0) canvas.requestPointerLock?.()?.catch?.(() => {});
     });
     document.addEventListener('pointerlockchange', () => { this.locked = document.pointerLockElement === canvas; });
@@ -35,7 +36,8 @@ export class Input {
     this.pressed = this._pending;
     this._pending = new Set();
     this.mouseDX = this._dx; this.mouseDY = this._dy; this.wheel = this._wheel; this.clicked = this._click;
-    this._dx = 0; this._dy = 0; this._wheel = 0; this._click = false;
+    this.attackClick = this.enabled && this._atk;
+    this._dx = 0; this._dy = 0; this._wheel = 0; this._click = false; this._atk = false;
   }
 
   isDown(...codes) { return this.enabled && codes.some((c) => this.down.has(c)); }

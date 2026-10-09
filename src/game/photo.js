@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { groundHeight } from '../world/terrain.js';
 import { CODEX } from './content.js';
+import { t } from '../i18n.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -71,11 +72,11 @@ export class Photo {
     for (const id of fresh) g.state.add('codex', id);
     if (fresh.length) {
       g.audio.play('feather');
-      const names = fresh.map((id) => CODEX.find((c) => c.id === id)?.name || id).join('、');
-      g.hud.toast(`图鉴新增：${names}（${d.codex.length}/${CODEX.length}）`, 3500);
+      const names = fresh.map((id) => CODEX.find((c) => c.id === id)?.name || id).join(t('、'));
+      g.hud.toast(t('图鉴新增：{0}（{1}/{2}）', [names, d.codex.length, CODEX.length]), 3500);
       g.state.save();
     } else if (found.size) {
-      g.hud.toast('这些都已经登记过了。');
-    } else g.hud.toast('没拍到什么特别的东西。靠近一点，对准目标试试。');
+      g.hud.toast(t('这些都已经登记过了。'));
+    } else g.hud.toast(t('没拍到什么特别的东西。靠近一点，对准目标试试。'));
   }
 }

@@ -1,3 +1,4 @@
+import { t } from '../i18n.js';
 // Typewriter dialog box with choices and optional free-text chat input.
 const $ = (s, r = document) => r.querySelector(s);
 
@@ -69,7 +70,7 @@ export class Dialog {
         this.textEl.textContent = text.slice(0, i);
         if (i % 2 === 0 && text[i - 1] !== ' ') this.audio?.play('blip', this.voice);
         if (i >= text.length) { this._typing = null; this.nextEl.hidden = false; done(); return; }
-        this._typing.timer = setTimeout(step, /[，。！？…、]/.test(text[i - 1]) ? 110 : 28);
+        this._typing.timer = setTimeout(step, /[，。！？…、.,!?]/.test(text[i - 1]) ? 110 : 28);
       };
       this._typing = { text, done, timer: setTimeout(step, 30) };
     });
@@ -131,7 +132,7 @@ export class Dialog {
 
   thinking(name) {
     this.nameEl.textContent = name;
-    this.textEl.innerHTML = '<span class="thinking">（思考中…）</span>';
+    this.textEl.innerHTML = t('<span class="thinking">（思考中…）</span>');
     this.nextEl.hidden = true;
   }
 }

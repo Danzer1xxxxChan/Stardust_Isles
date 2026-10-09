@@ -4,6 +4,7 @@ import { objectiveSummary } from '../game/quests.js';
 import { regionAt } from '../world/terrain.js';
 import { REGIONS } from '../world/layout.js';
 import { ABILITY_NAMES } from '../game/content.js';
+import { t, LANG } from '../i18n.js';
 
 export class AiClient {
   constructor(game) {
@@ -21,9 +22,9 @@ export class AiClient {
       shards: d.shards.length,
       feathers: d.feathers.length,
       coins: d.coins,
-      time: `${Math.floor(d.time)}点`,
+      time: t('{0}点', [Math.floor(d.time)]),
       night: g.sky.night > 0.5,
-      region: REGIONS[region]?.name || '海上',
+      region: REGIONS[region]?.name || t('海上'),
       abilities: Object.entries(d.abilities).filter(([, v]) => v).map(([k]) => ABILITY_NAMES[k]),
       objectives: objectiveSummary(g.state, g.content),
       ending: d.ending,
@@ -35,12 +36,12 @@ export class AiClient {
       const r = await fetch('/api/npc-chat', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ npc: npc.id, history, message, context: this.context() }),
+        body: JSON.stringify({ npc: npc.id, history, message, context: this.context(), lang: LANG }),
       });
       const j = await r.json();
       return j.reply || '……';
     } catch {
-      return '（对方好像没听清你在说什么。）';
+      return t('（对方好像没听清你在说什么。）');
     }
   }
 }

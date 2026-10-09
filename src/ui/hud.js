@@ -1,6 +1,7 @@
 // Heads-up display: counters, clock, stamina ring, prompts, toasts, banners, compass.
 import * as THREE from 'three';
 import { SHARD_TOTAL, FEATHER_TOTAL } from '../game/content.js';
+import { t } from '../i18n.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -41,7 +42,7 @@ export class Hud {
     set('f', this.feather, d.feathers.length);
     set('c', this.coin, d.coins);
     const h = Math.floor(d.time), m = Math.floor((d.time - h) * 60);
-    const ct = `第${d.day}天 ${String(h).padStart(2, '0')}:${String(Math.floor(m / 10) * 10).padStart(2, '0')}`;
+    const ct = t('第{0}天 {1}:{2}', [d.day, String(h).padStart(2, '0'), String(Math.floor(m / 10) * 10).padStart(2, '0')]);
     if (this._last.clock !== ct) { this._last.clock = ct; this.clockText.textContent = ct; }
     const icon = game.sky.night > 0.5 ? '🌙' : (d.time < 7 || d.time > 18 ? '🌅' : '☀️');
     if (this._last.icon !== icon) { this._last.icon = icon; this.clockIcon.textContent = icon; }
@@ -98,7 +99,7 @@ export class Hud {
     if (angle === null) { this.compass.hidden = true; return; }
     this.compass.hidden = false;
     this.compassArrow.style.transform = `rotate(${angle - Math.PI / 2}rad)`;
-    this.compassDist.textContent = `${Math.round(dist)} 米`;
+    this.compassDist.textContent = t('{0} 米', [Math.round(dist)]);
   }
 
   setRace(title, time) {

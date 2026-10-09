@@ -114,6 +114,22 @@ export class Audio {
       case 'plate': this.tone(n(64), 0.3, { type: 'triangle', vol: 0.12 }); this.tone(n(71), 0.3, { type: 'triangle', vol: 0.1, delay: 0.1 }); break;
       case 'star': [84, 88, 91, 96].forEach((m, i) => this.tone(n(m), 0.8, { vol: 0.08, delay: i * 0.15, echo: true })); break;
       case 'ability': [60, 64, 67, 72, 76, 79, 84].forEach((m, i) => this.tone(n(m), 0.5, { type: 'triangle', vol: 0.11, delay: i * 0.08, echo: true })); break;
+      // ---- Combat ----
+      case 'swing': this.noise(arg ? 0.3 : 0.18, { freq: 900, sweep: arg ? 5200 : 4200, filter: 'bandpass', q: 1.4, vol: arg ? 0.22 : 0.16, attack: 0.02 }); break;
+      case 'hit': this.noise(0.09, { freq: 2600, filter: 'bandpass', q: 0.9, vol: 0.32 }); this.tone(170, 0.12, { type: 'square', vol: 0.07, slide: 70 }); this.tone(n(84), 0.08, { type: 'triangle', vol: 0.04 }); break;
+      case 'crit': this.noise(0.14, { freq: 3500, filter: 'bandpass', q: 0.8, vol: 0.36 }); this.tone(220, 0.18, { type: 'square', vol: 0.09, slide: 60 }); [88, 95].forEach((m, i) => this.tone(n(m), 0.25, { type: 'triangle', vol: 0.07, delay: i * 0.05, echo: true })); break;
+      case 'hurt': this.noise(0.18, { freq: 500, vol: 0.3 }); this.tone(260, 0.22, { type: 'sawtooth', vol: 0.06, slide: 120 }); break;
+      case 'die': [64, 60, 57, 52].forEach((m, i) => this.tone(n(m), 0.5, { type: 'triangle', vol: 0.1, delay: i * 0.18, echo: true })); break;
+      case 'enemyDie': this.noise(0.5, { freq: 3000, sweep: 400, vol: 0.18 }); [79, 83, 86, 91].forEach((m, i) => this.tone(n(m), 0.3, { vol: 0.05, delay: 0.05 + i * 0.05, echo: true })); break;
+      case 'poof': this.noise(0.3, { freq: 2500, sweep: 6000, filter: 'highpass', vol: 0.1 }); [84, 88, 91].forEach((m, i) => this.tone(n(m), 0.25, { vol: 0.05, delay: i * 0.06, echo: true })); break;
+      case 'heal': [72, 76, 79, 84].forEach((m, i) => this.tone(n(m), 0.35, { type: 'triangle', vol: 0.07, delay: i * 0.05, echo: true })); break;
+      case 'dodge': this.noise(0.22, { freq: 600, sweep: 2400, filter: 'bandpass', q: 1.2, vol: 0.12 }); break;
+      case 'perfect': this.tone(n(91), 0.3, { type: 'triangle', vol: 0.09, echo: true }); this.tone(n(98), 0.3, { vol: 0.06, delay: 0.06 }); break;
+      case 'slam': this.noise(0.5, { freq: 250, sweep: 60, vol: 0.45 }); this.tone(90, 0.4, { type: 'sine', vol: 0.25, slide: 35 }); break;
+      case 'growl': this.tone(110, 0.6, { type: 'sawtooth', vol: 0.05, slide: 80 }); this.noise(0.6, { freq: 300, vol: 0.06 }); break;
+      case 'gloom': this.tone(180, 0.4, { type: 'triangle', vol: 0.06, slide: 120 }); this.tone(n(61), 0.4, { vol: 0.04, delay: 0.1 }); break;
+      case 'windup': this.tone(300, 0.35, { type: 'triangle', vol: 0.05, slide: 600 }); break;
+      case 'golemCharge': this.noise(1.0, { freq: 120, sweep: 600, vol: 0.2 }); this.tone(70, 1.0, { type: 'sawtooth', vol: 0.05, slide: 140 }); break;
       default: break;
     }
   }

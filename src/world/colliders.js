@@ -45,6 +45,21 @@ export class Colliders {
 
   remove(c) { c.enabled = false; this.dynamic.delete(c); }
 
+  // Fully unregisters a static shape (used when far-isle chunks stream out).
+  removeStatic(c) {
+    c.enabled = false;
+    const r = c.bound;
+    const i0 = Math.floor((c.x - r) / CELL), i1 = Math.floor((c.x + r) / CELL);
+    const j0 = Math.floor((c.z - r) / CELL), j1 = Math.floor((c.z + r) / CELL);
+    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
+      const k = this._key(i, j), list = this.grid.get(k);
+      if (!list) continue;
+      const at = list.indexOf(c);
+      if (at >= 0) list.splice(at, 1);
+      if (!list.length) this.grid.delete(k);
+    }
+  }
+
   query(x, z, r) {
     const out = this._out; out.length = 0;
     const seen = this._seen; seen.clear();

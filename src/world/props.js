@@ -5,7 +5,18 @@ import { hash2, mulberry32 } from '../core/math.js';
 
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3(), _p = new THREE.Vector3();
 
+// Low-segment round primitives read better faceted; everything else keeps its smooth normals.
+function lowPoly(geo) {
+  const p = geo.parameters || {};
+  if (geo.type === 'CylinderGeometry' || geo.type === 'ConeGeometry') return p.radialSegments < 7;
+  if (geo.type === 'SphereGeometry') return p.widthSegments < 7;
+  return false;
+}
+
+// t.round: foliage-style normals pointing away from the part centre (soft, painterly shading).
+// t.flat: force faceted normals.
 export function part(geo, color, t = {}) {
+  const flat = t.flat ?? lowPoly(geo);
   const g = geo.index ? geo.toNonIndexed() : geo;
   geo !== g && geo.dispose();
   if (g.attributes.uv) g.deleteAttribute('uv');
@@ -18,12 +29,25 @@ export function part(geo, color, t = {}) {
   _m.compose(_p, _q, _s);
   if (t.jitter) jitter(g, t.jitter, t.seed || 1);
   g.applyMatrix4(_m);
+  if (t.round) roundNormals(g, _p);
+  else if (flat || t.jitter || !g.attributes.normal) g.computeVertexNormals();
   const c = new THREE.Color(color);
   const n = g.attributes.position.count;
   const arr = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) { arr[i * 3] = c.r; arr[i * 3 + 1] = c.g; arr[i * 3 + 2] = c.b; }
   g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
   return g;
+}
+
+function roundNormals(g, c) {
+  const p = g.attributes.position;
+  const nrm = new Float32Array(p.count * 3);
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i) - c.x, y = (p.getY(i) - c.y) * 0.8 + 0.25, z = p.getZ(i) - c.z;
+    const l = Math.hypot(x, y, z) || 1;
+    nrm[i * 3] = x / l; nrm[i * 3 + 1] = y / l; nrm[i * 3 + 2] = z / l;
+  }
+  g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
 }
 
 function jitter(g, amt, seed) {
@@ -41,15 +65,55 @@ function jitter(g, amt, seed) {
 export function build(parts) {
   const g = mergeGeometries(parts, false);
   parts.forEach((p) => p.dispose());
-  g.computeVertexNormals();
   g.computeBoundingSphere();
   g.computeBoundingBox();
   return g;
 }
 
-export const propMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.88, metalness: 0 });
+// Stylised rim light: brightens grazing angles so silhouettes separate from the background.
+export function rimify(mat, color = 0xfff4dc, strength = 0.35, power = 3.0) {
+  const prev = mat.onBeforeCompile;
+  mat.onBeforeCompile = (sh, r) => {
+    prev?.call(mat, sh, r);
+    sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+      { float rim = pow(1.0 - abs(dot(normalize(vViewPosition), normal)), ${power.toFixed(2)});
+        totalEmissiveRadiance += vec3(${new THREE.Color(color).toArray().map((v) => v.toFixed(3)).join(',')}) * rim * ${strength.toFixed(3)} * diffuseColor.rgb; }`);
+  };
+  mat.userData.rim = `${color}/${strength}/${power}`;
+  mat.customProgramCacheKey = () => JSON.stringify(mat.userData);
+  return mat;
+}
+
+// Shared wind uniforms (time + gust direction), ticked from the game loop.
+export const WIND = { uTime: { value: 0 }, uDir: { value: new THREE.Vector2(0.8, 0.6) }, uStrength: { value: 1 } };
+
+// Vertex sway for vegetation. mode 'instanced': height = local y; mode 'attr': height from aH attribute.
+export function windify(mat, mode = 'instanced', amount = 1) {
+  const prev = mat.onBeforeCompile;
+  mat.userData.wind = mode + amount;
+  mat.onBeforeCompile = (sh, r) => {
+    prev?.call(mat, sh, r);
+    sh.uniforms.uWindTime = WIND.uTime; sh.uniforms.uWindDir = WIND.uDir; sh.uniforms.uWindStr = WIND.uStrength;
+    const head = `uniform float uWindTime; uniform vec2 uWindDir; uniform float uWindStr;${mode === 'attr' ? ' attribute float aH;' : ''}`;
+    const hExpr = mode === 'attr' ? 'aH' : 'max(0.0, position.y - 0.25)';
+    const base = mode === 'attr' ? 'position.xz' : '(instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xz';
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\n' + head)
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+        { float hh = ${hExpr}; vec2 bp = ${base};
+          float ph = dot(bp, vec2(0.11, 0.07)) + uWindTime * 1.7;
+          float gust = 0.6 + 0.4 * sin(dot(bp, uWindDir) * 0.02 - uWindTime * 0.9);
+          float sway = (sin(ph) * 0.6 + sin(ph * 2.3 + 1.7) * 0.25) * gust * uWindStr * ${(0.035 * amount).toFixed(4)} * hh * hh;
+          transformed.x += uWindDir.x * sway; transformed.z += uWindDir.y * sway;
+          transformed.y -= abs(sway) * 0.15; }`);
+  };
+  mat.customProgramCacheKey = () => JSON.stringify(mat.userData);
+  return mat;
+}
+
+export const propMaterial = rimify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82, metalness: 0 }), 0xfff4dc, 0.18);
 export const glowMaterial = (color, intensity = 1.6) =>
-  new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, emissive: color, emissiveIntensity: intensity, roughness: 0.6 });
+  new THREE.MeshStandardMaterial({ vertexColors: true, emissive: color, emissiveIntensity: intensity, roughness: 0.5 });
+export const vegMaterial = windify(rimify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0 }), 0xf0ffd0, 0.22), 'instanced');
 
 const Cyl = (rt, rb, h, seg = 6) => new THREE.CylinderGeometry(rt, rb, h, seg);
 const Cone = (r, h, seg = 6) => new THREE.ConeGeometry(r, h, seg);
@@ -67,9 +131,9 @@ export function oak(seed = 1, leaf = 0x6cae4a) {
   for (let i = 0; i < blobs; i++) {
     const a = (i / blobs) * Math.PI * 2 + r();
     const c = new THREE.Color(leaf).offsetHSL((r() - 0.5) * 0.03, 0, (r() - 0.5) * 0.08);
-    parts.push(part(Ico(1.3 + r() * 0.5, 0), c, { x: Math.cos(a) * 0.9, y: 3.2 + r() * 0.8, z: Math.sin(a) * 0.9, jitter: 0.35, seed: seed + i }));
+    parts.push(part(Ico(1.3 + r() * 0.5, 1), c, { x: Math.cos(a) * 0.9, y: 3.2 + r() * 0.8, z: Math.sin(a) * 0.9, jitter: 0.3, seed: seed + i, round: true }));
   }
-  parts.push(part(Ico(1.5, 0), leaf, { y: 4.2, jitter: 0.3, seed: seed + 9 }));
+  parts.push(part(Ico(1.5, 1), new THREE.Color(leaf).offsetHSL(0, 0.02, 0.05), { y: 4.3, jitter: 0.28, seed: seed + 9, round: true }));
   return build(parts);
 }
 
@@ -80,7 +144,7 @@ export function pine(seed = 1, leaf = 0x3f7d4a, snow = false, tall = 1) {
   for (let i = 0; i < tiers; i++) {
     const rad = (1.9 - i * 0.4) * (0.9 + r() * 0.2);
     const y = (1.4 + i * 1.25) * tall;
-    parts.push(part(Cone(rad, 2.2 * tall, 7), leaf, { y, ry: r() * 3 }));
+    parts.push(part(Cone(rad, 2.2 * tall, 9), new THREE.Color(leaf).offsetHSL(0, 0, i * 0.025), { y, ry: r() * 3, round: true }));
     if (snow) parts.push(part(Cone(rad * 0.55, 0.9 * tall, 7), 0xf2f6fa, { y: y + 0.75 * tall, ry: r() * 3 }));
   }
   return build(parts);
@@ -131,7 +195,7 @@ export function deadTree(seed = 1) {
 export function bush(seed = 1, color = 0x5e9e45, berries = false) {
   const r = mulberry32(seed);
   const parts = [];
-  for (let i = 0; i < 3; i++) parts.push(part(Ico(0.6 + r() * 0.3), new THREE.Color(color).offsetHSL(0, 0, (r() - 0.5) * 0.08), { x: (r() - 0.5) * 0.8, y: 0.45, z: (r() - 0.5) * 0.8, jitter: 0.2, seed: seed + i }));
+  for (let i = 0; i < 3; i++) parts.push(part(Ico(0.6 + r() * 0.3, 1), new THREE.Color(color).offsetHSL(0, 0, (r() - 0.5) * 0.08), { x: (r() - 0.5) * 0.8, y: 0.45, z: (r() - 0.5) * 0.8, jitter: 0.18, seed: seed + i, round: true }));
   if (berries) for (let i = 0; i < 5; i++) parts.push(part(Ico(0.09), 0xd8344a, { x: (r() - 0.5) * 1.2, y: 0.6 + r() * 0.4, z: (r() - 0.5) * 1.2 }));
   return build(parts);
 }
@@ -208,7 +272,7 @@ export function coral(seed = 1) {
 
 export function shell() {
   return build([
-    part(Cone(0.32, 0.18, 8), 0xffc2c7, { y: 0.09 }),
-    part(Cone(0.18, 0.12, 8), 0xffe4e1, { y: 0.2 }),
+    part(Cone(0.32, 0.18, 8), 0xffc2c7, { y: 0.09, flat: true }),
+    part(Cone(0.18, 0.12, 8), 0xffe4e1, { y: 0.2, flat: true }),
   ]);
 }

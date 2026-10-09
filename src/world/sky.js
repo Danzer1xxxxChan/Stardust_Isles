@@ -29,28 +29,52 @@ export class Sky {
     this.renderer = renderer;
     this.uniforms = {
       top: { value: new THREE.Color() }, hor: { value: new THREE.Color() }, sunDir: { value: new THREE.Vector3(0, 1, 0) },
-      sunCol: { value: new THREE.Color() }, night: { value: 0 }, time: { value: 0 },
+      sunCol: { value: new THREE.Color() }, night: { value: 0 }, time: { value: 0 }, cover: { value: 0 },
     };
     const skyMat = new THREE.ShaderMaterial({
       uniforms: this.uniforms, side: THREE.BackSide, depthWrite: false, fog: false,
       vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); vec4 p = modelViewMatrix * vec4(position,1.0); gl_Position = projectionMatrix * p; gl_Position.z = gl_Position.w; }`,
-      fragmentShader: `uniform vec3 top; uniform vec3 hor; uniform vec3 sunDir; uniform vec3 sunCol; uniform float night;
+      fragmentShader: `uniform vec3 top; uniform vec3 hor; uniform vec3 sunDir; uniform vec3 sunCol; uniform float night; uniform float time; uniform float cover;
         varying vec3 vDir;
+        float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+        float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+          return mix(mix(h21(i), h21(i+vec2(1,0)), f.x), mix(h21(i+vec2(0,1)), h21(i+vec2(1,1)), f.x), f.y); }
+        float fbm(vec2 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 5; i++){ s += a * vn(p); p = p * 2.03 + vec2(1.7, 9.2); a *= 0.5; } return s; }
         void main(){
           vec3 d = normalize(vDir);
           float h = clamp(d.y, -0.2, 1.0);
           vec3 c = mix(hor, top, pow(max(h,0.0), 0.55));
           if (h < 0.0) c = hor;
           float s = max(dot(d, sunDir), 0.0);
-          c += sunCol * (pow(s, 900.0) * 3.0 + pow(s, 12.0) * 0.25) * (1.0 - night);
+          float day = 1.0 - night;
+          c += sunCol * (pow(s, 900.0) * 6.0 + pow(s, 64.0) * 0.35 + pow(s, 8.0) * 0.18) * day;
           vec3 md = -sunDir;
           float m = max(dot(d, md), 0.0);
-          c += vec3(0.85,0.9,1.0) * (smoothstep(0.9993, 0.9996, m) * 1.2 + pow(m, 40.0) * 0.12) * night;
+          c += vec3(0.85,0.9,1.0) * (smoothstep(0.9993, 0.9996, m) * 1.6 + pow(m, 40.0) * 0.12) * night;
+          // Cloud layer: flat plane projection, two drifting fbm layers.
+          if (d.y > 0.0) {
+            vec2 uv = d.xz / (d.y + 0.12) * 1.6;
+            vec2 wind = vec2(time * 0.012, time * 0.006);
+            float n = fbm(uv + wind) * 0.75 + fbm(uv * 2.7 - wind * 1.7) * 0.35;
+            float cov = mix(0.62, 0.32, cover);
+            float dens = smoothstep(cov, cov + 0.28, n);
+            float thick = smoothstep(cov, cov + 0.55, n);
+            float fade = smoothstep(0.0, 0.18, d.y);
+            float toward = pow(s, 6.0);
+            vec3 lit = mix(vec3(1.0), sunCol, 0.45) * (0.85 + toward * 0.6);
+            vec3 shade = mix(hor, top, 0.35) * 0.75;
+            vec3 cc = mix(lit, shade, thick * 0.75);
+            cc += sunCol * pow(s, 12.0) * (1.0 - thick) * 1.2 * day;   // silver lining
+            cc = mix(cc, vec3(0.13, 0.16, 0.26) + hor * 0.3, night * 0.85);
+            cc = mix(cc, vec3(0.55, 0.58, 0.62), cover * 0.55 * day);
+            c = mix(c, cc, dens * fade * 0.92);
+          }
           gl_FragColor = vec4(c, 1.0);
+          #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`,
     });
-    this.dome = new THREE.Mesh(new THREE.SphereGeometry(900, 32, 16), skyMat);
+    this.dome = new THREE.Mesh(new THREE.SphereGeometry(900, 48, 24), skyMat);
     this.dome.frustumCulled = false;
     this.dome.renderOrder = -10;
     scene.add(this.dome);
@@ -72,11 +96,13 @@ export class Sky {
 
     this.sun = new THREE.DirectionalLight(0xffffff, 2);
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
+    this.sun.shadow.mapSize.set(4096, 4096);
     const sc = this.sun.shadow.camera;
     sc.left = -70; sc.right = 70; sc.top = 70; sc.bottom = -70; sc.near = 1; sc.far = 400;
-    this.sun.shadow.bias = -0.0006;
-    this.sun.shadow.normalBias = 0.6;
+    this.sun.shadow.bias = -0.0004;
+    this.sun.shadow.normalBias = 0.35;
+    this.sun.shadow.radius = 3;
+    this.sun.shadow.blurSamples = 12;
     scene.add(this.sun);
     scene.add(this.sun.target);
     this.hemi = new THREE.HemisphereLight(0xbfdcff, 0x7a8a5a, 0.7);
@@ -134,6 +160,9 @@ export class Sky {
     lightDir.normalize();
     const moonI = this.night * 0.55;
     this.sun.intensity = Math.max(sunI, moonI);
+    this.sunIntensity = sunI;
+    u.time.value = elapsed;
+    u.cover.value = this.rain;
     this.sun.color.copy(this.night > 0.5 ? new THREE.Color(0x9fb4ff) : sunC);
     this.sun.position.copy(focus).addScaledVector(lightDir, 200);
     this.sun.target.position.copy(focus);

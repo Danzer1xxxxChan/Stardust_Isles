@@ -1,6 +1,7 @@
 // All placed gameplay content. Positions adapt to the generated terrain via helpers.
 import { groundHeight, highestPoint, flattestNear, riverX, waterLevel } from '../world/terrain.js';
 import { LANDMARKS, LAKE, LAKE_ISLANDS, ISLETS, MOUNTAIN, CAMPFIRES, VILLAGE, DARK_FOREST } from '../world/layout.js';
+import { t } from '../i18n.js';
 
 export const SHARD_TOTAL = 30;
 export const FEATHER_TOTAL = 15;
@@ -129,9 +130,9 @@ export function resolveContent() {
 
   // ---------- Treasure maps / dig spots ----------
   C.digs = [
-    { id: 'dig1', map: 'map1', ...at(222, 78, 0), clue: '藏宝图上画着一座红色的石拱门，拱门西南方向不远处画着一个叉。' },
-    { id: 'dig2', map: 'map2', ...at(196, 236, 0), clue: '地图上是一片沙滩和一艘歪倒的船，叉画在船的西北方、营火附近的沙地上。' },
-    { id: 'dig3', map: 'map3', ...at(122, -126, 0), clue: '地图上画着一座圆顶的观星台，叉在它的东北方，靠近一块平地。' },
+    { id: 'dig1', map: 'map1', ...at(222, 78, 0), clue: t('藏宝图上画着一座红色的石拱门，拱门西南方向不远处画着一个叉。') },
+    { id: 'dig2', map: 'map2', ...at(196, 236, 0), clue: t('地图上是一片沙滩和一艘歪倒的船，叉画在船的西北方、营火附近的沙地上。') },
+    { id: 'dig3', map: 'map3', ...at(122, -126, 0), clue: t('地图上画着一座圆顶的观星台，叉在它的东北方，靠近一块平地。') },
   ];
 
   // ---------- Coin trails ----------
@@ -228,50 +229,50 @@ export function resolveContent() {
 // ---------- Static data ----------
 export const CODEX = [
   // creatures
-  { id: 'sheep', cat: '动物', name: '绵羊', desc: '草原上最常见的居民，毛茸茸的，喜欢成群结队。' },
-  { id: 'cat', cat: '动物', name: '团子', desc: '村里的橘猫，整天在艾拉奶奶家门口晒太阳。' },
-  { id: 'fox', cat: '动物', name: '赤狐', desc: '森林里机灵的小狐狸，总在你靠近时跑开。' },
-  { id: 'spiritfox', cat: '动物', name: '星光狐', desc: '浑身泛着微光的狐狸，据说会把人引向星屑。' },
-  { id: 'deer', cat: '动物', name: '梅花鹿', desc: '胆小的森林居民，一有动静就会跑远。' },
-  { id: 'crab', cat: '动物', name: '寄居蟹', desc: '在沙滩上横着走的小家伙。' },
-  { id: 'seagull', cat: '动物', name: '海鸥', desc: '在海岸上空盘旋，时不时发出嘎嘎的叫声。' },
-  { id: 'butterfly', cat: '动物', name: '花蝴蝶', desc: '白天在花丛中飞舞。' },
-  { id: 'owl', cat: '动物', name: '夜枭', desc: '只在夜晚的森林里出现，眼睛像两盏小灯。' },
-  { id: 'frog', cat: '动物', name: '雨蛙', desc: '下雨天会出现在水晶湖边呱呱叫。' },
-  { id: 'goat', cat: '动物', name: '岩羊', desc: '雪山悬崖上的攀岩高手。' },
-  { id: 'lizard', cat: '动物', name: '红岩蜥', desc: '在峡谷的岩石上晒太阳。' },
-  { id: 'whale', cat: '动物', name: '座头鲸', desc: '偶尔在东边的海面上浮起换气，非常罕见。' },
-  { id: 'firefly', cat: '动物', name: '萤火虫', desc: '夜晚迷雾森林里的点点亮光。' },
+  { id: 'sheep', cat: t('动物'), name: t('绵羊'), desc: t('草原上最常见的居民，毛茸茸的，喜欢成群结队。') },
+  { id: 'cat', cat: t('动物'), name: t('团子'), desc: t('村里的橘猫，整天在艾拉奶奶家门口晒太阳。') },
+  { id: 'fox', cat: t('动物'), name: t('赤狐'), desc: t('森林里机灵的小狐狸，总在你靠近时跑开。') },
+  { id: 'spiritfox', cat: t('动物'), name: t('星光狐'), desc: t('浑身泛着微光的狐狸，据说会把人引向星屑。') },
+  { id: 'deer', cat: t('动物'), name: t('梅花鹿'), desc: t('胆小的森林居民，一有动静就会跑远。') },
+  { id: 'crab', cat: t('动物'), name: t('寄居蟹'), desc: t('在沙滩上横着走的小家伙。') },
+  { id: 'seagull', cat: t('动物'), name: t('海鸥'), desc: t('在海岸上空盘旋，时不时发出嘎嘎的叫声。') },
+  { id: 'butterfly', cat: t('动物'), name: t('花蝴蝶'), desc: t('白天在花丛中飞舞。') },
+  { id: 'owl', cat: t('动物'), name: t('夜枭'), desc: t('只在夜晚的森林里出现，眼睛像两盏小灯。') },
+  { id: 'frog', cat: t('动物'), name: t('雨蛙'), desc: t('下雨天会出现在水晶湖边呱呱叫。') },
+  { id: 'goat', cat: t('动物'), name: t('岩羊'), desc: t('雪山悬崖上的攀岩高手。') },
+  { id: 'lizard', cat: t('动物'), name: t('红岩蜥'), desc: t('在峡谷的岩石上晒太阳。') },
+  { id: 'whale', cat: t('动物'), name: t('座头鲸'), desc: t('偶尔在东边的海面上浮起换气，非常罕见。') },
+  { id: 'firefly', cat: t('动物'), name: t('萤火虫'), desc: t('夜晚迷雾森林里的点点亮光。') },
   // plants
-  { id: 'oak', cat: '植物', name: '橡树', desc: '草原和森林边缘的阔叶树。' },
-  { id: 'pine', cat: '植物', name: '松树', desc: '耐寒的针叶树，长在湖边和山脚。' },
-  { id: 'darkpine', cat: '植物', name: '雾松', desc: '迷雾森林里高大的深色松树。' },
-  { id: 'snowpine', cat: '植物', name: '雪松', desc: '枝头挂着积雪的松树，只长在雪山高处。' },
-  { id: 'palm', cat: '植物', name: '椰子树', desc: '海边的标志，树顶挂着椰子。' },
-  { id: 'cactus', cat: '植物', name: '仙人掌', desc: '峡谷里的耐旱植物，有时会开粉色的花。' },
-  { id: 'flower', cat: '植物', name: '野花', desc: '草原上五颜六色的小花。' },
-  { id: 'sunflower', cat: '植物', name: '向日葵', desc: '总是朝着太阳的方向。' },
-  { id: 'mushroom', cat: '植物', name: '红蘑菇', desc: '森林地面上的蘑菇，别乱吃。' },
-  { id: 'reeds', cat: '植物', name: '芦苇', desc: '湖边浅水里的植物。' },
-  { id: 'crystal', cat: '植物', name: '湖晶', desc: '水晶湖周围自然生长的发光晶体。' },
+  { id: 'oak', cat: t('植物'), name: t('橡树'), desc: t('草原和森林边缘的阔叶树。') },
+  { id: 'pine', cat: t('植物'), name: t('松树'), desc: t('耐寒的针叶树，长在湖边和山脚。') },
+  { id: 'darkpine', cat: t('植物'), name: t('雾松'), desc: t('迷雾森林里高大的深色松树。') },
+  { id: 'snowpine', cat: t('植物'), name: t('雪松'), desc: t('枝头挂着积雪的松树，只长在雪山高处。') },
+  { id: 'palm', cat: t('植物'), name: t('椰子树'), desc: t('海边的标志，树顶挂着椰子。') },
+  { id: 'cactus', cat: t('植物'), name: t('仙人掌'), desc: t('峡谷里的耐旱植物，有时会开粉色的花。') },
+  { id: 'flower', cat: t('植物'), name: t('野花'), desc: t('草原上五颜六色的小花。') },
+  { id: 'sunflower', cat: t('植物'), name: t('向日葵'), desc: t('总是朝着太阳的方向。') },
+  { id: 'mushroom', cat: t('植物'), name: t('红蘑菇'), desc: t('森林地面上的蘑菇，别乱吃。') },
+  { id: 'reeds', cat: t('植物'), name: t('芦苇'), desc: t('湖边浅水里的植物。') },
+  { id: 'crystal', cat: t('植物'), name: t('湖晶'), desc: t('水晶湖周围自然生长的发光晶体。') },
   // landmarks
-  { id: 'windmill', cat: '地标', name: '老风车', desc: '村庄的标志，阳台上能看到整片草原。' },
-  { id: 'lighthouse', cat: '地标', name: '星屑灯塔', desc: '雪山顶上熄灭的灯塔，群岛的守护者。' },
-  { id: 'observatory', cat: '地标', name: '星野天文台', desc: '星野先生观测星空的地方。' },
-  { id: 'ruins', cat: '地标', name: '古代遗迹', desc: '不知是谁留下的石柱和地砖。' },
-  { id: 'shipwreck', cat: '地标', name: '沉船', desc: '很久以前搁浅在海岸边的帆船。' },
-  { id: 'arch', cat: '地标', name: '红石拱门', desc: '峡谷里被风雕刻出的天然拱门。' },
-  { id: 'giantTree', cat: '地标', name: '千年古树', desc: '森林里最古老的树，树干上长满了蘑菇台阶。' },
+  { id: 'windmill', cat: t('地标'), name: t('老风车'), desc: t('村庄的标志，阳台上能看到整片草原。') },
+  { id: 'lighthouse', cat: t('地标'), name: t('星屑灯塔'), desc: t('雪山顶上熄灭的灯塔，群岛的守护者。') },
+  { id: 'observatory', cat: t('地标'), name: t('星野天文台'), desc: t('星野先生观测星空的地方。') },
+  { id: 'ruins', cat: t('地标'), name: t('古代遗迹'), desc: t('不知是谁留下的石柱和地砖。') },
+  { id: 'shipwreck', cat: t('地标'), name: t('沉船'), desc: t('很久以前搁浅在海岸边的帆船。') },
+  { id: 'arch', cat: t('地标'), name: t('红石拱门'), desc: t('峡谷里被风雕刻出的天然拱门。') },
+  { id: 'giantTree', cat: t('地标'), name: t('千年古树'), desc: t('森林里最古老的树，树干上长满了蘑菇台阶。') },
   // fish
-  { id: 'bass', cat: '鱼类', name: '海鲈鱼', desc: '码头边最常见的鱼。', fish: true },
-  { id: 'mackerel', cat: '鱼类', name: '青花鱼', desc: '游得很快的海鱼。', fish: true },
-  { id: 'puffer', cat: '鱼类', name: '河豚', desc: '被钓上来就会鼓成一个球。', fish: true },
-  { id: 'golden', cat: '鱼类', name: '金鳞鱼', desc: '传说中的鱼，鳞片像星屑一样闪光。', fish: true },
-  { id: 'lanternfish', cat: '鱼类', name: '灯笼鱼', desc: '只在夜里浮上来的发光小鱼。', fish: true },
-  { id: 'trout', cat: '鱼类', name: '虹鳟', desc: '水晶湖里的冷水鱼。', fish: true },
-  { id: 'crystalcarp', cat: '鱼类', name: '水晶鲤', desc: '身体半透明的鲤鱼，只在水晶湖里有。', fish: true },
-  { id: 'salmon', cat: '鱼类', name: '鲑鱼', desc: '在河里逆流而上的鱼。', fish: true },
-  { id: 'catfish', cat: '鱼类', name: '鲶鱼', desc: '长着胡子的河底大鱼。', fish: true },
+  { id: 'bass', cat: t('鱼类'), name: t('海鲈鱼'), desc: t('码头边最常见的鱼。'), fish: true },
+  { id: 'mackerel', cat: t('鱼类'), name: t('青花鱼'), desc: t('游得很快的海鱼。'), fish: true },
+  { id: 'puffer', cat: t('鱼类'), name: t('河豚'), desc: t('被钓上来就会鼓成一个球。'), fish: true },
+  { id: 'golden', cat: t('鱼类'), name: t('金鳞鱼'), desc: t('传说中的鱼，鳞片像星屑一样闪光。'), fish: true },
+  { id: 'lanternfish', cat: t('鱼类'), name: t('灯笼鱼'), desc: t('只在夜里浮上来的发光小鱼。'), fish: true },
+  { id: 'trout', cat: t('鱼类'), name: t('虹鳟'), desc: t('水晶湖里的冷水鱼。'), fish: true },
+  { id: 'crystalcarp', cat: t('鱼类'), name: t('水晶鲤'), desc: t('身体半透明的鲤鱼，只在水晶湖里有。'), fish: true },
+  { id: 'salmon', cat: t('鱼类'), name: t('鲑鱼'), desc: t('在河里逆流而上的鱼。'), fish: true },
+  { id: 'catfish', cat: t('鱼类'), name: t('鲶鱼'), desc: t('长着胡子的河底大鱼。'), fish: true },
 ];
 
 export const FISH = {
@@ -281,19 +282,19 @@ export const FISH = {
 };
 
 export const SHOP = [
-  { id: 'shovel', name: '小铁铲', price: 60, desc: '能在藏宝图标记的地方挖宝。', ability: 'shovel' },
-  { id: 'boots', name: '弹跳靴', price: 150, desc: '在空中再按一次空格可以二段跳。', ability: 'boots' },
-  { id: 'compass', name: '星屑罗盘', price: 120, desc: '指向最近的、还没找到的星屑。', ability: 'compass' },
-  { id: 'cocoa', name: '热可可', price: 15, desc: '暖暖的一杯，适合送给怕冷的人。', item: 'cocoa' },
-  { id: 'straw', name: '草帽', price: 30, desc: '夏天必备。', hat: 'straw' },
-  { id: 'flower', name: '花环', price: 50, desc: '用草原上的野花编的。', hat: 'flower' },
-  { id: 'chef', name: '厨师帽', price: 80, desc: '戴上它感觉自己会做饭了。', hat: 'chef' },
+  { id: 'shovel', name: t('小铁铲'), price: 60, desc: t('能在藏宝图标记的地方挖宝。'), ability: 'shovel' },
+  { id: 'boots', name: t('弹跳靴'), price: 150, desc: t('在空中再按一次空格可以二段跳。'), ability: 'boots' },
+  { id: 'compass', name: t('星屑罗盘'), price: 120, desc: t('指向最近的、还没找到的星屑。'), ability: 'compass' },
+  { id: 'cocoa', name: t('热可可'), price: 15, desc: t('暖暖的一杯，适合送给怕冷的人。'), item: 'cocoa' },
+  { id: 'straw', name: t('草帽'), price: 30, desc: t('夏天必备。'), hat: 'straw' },
+  { id: 'flower', name: t('花环'), price: 50, desc: t('用草原上的野花编的。'), hat: 'flower' },
+  { id: 'chef', name: t('厨师帽'), price: 80, desc: t('戴上它感觉自己会做饭了。'), hat: 'chef' },
 ];
 
 export const HATS = {
-  straw: '草帽', flower: '花环', chef: '厨师帽', pirate: '海盗帽', wizard: '巫师帽', beanie: '毛线帽', cap: '跑步帽', crown: '星之王冠',
+  straw: t('草帽'), flower: t('花环'), chef: t('厨师帽'), pirate: t('海盗帽'), wizard: t('巫师帽'), beanie: t('毛线帽'), cap: t('跑步帽'), crown: t('星之王冠'),
 };
 
 export const ABILITY_NAMES = {
-  camera: '相机', glider: '滑翔翼', lantern: '提灯', rod: '钓竿', fins: '脚蹼', shovel: '小铁铲', boots: '弹跳靴', compass: '星屑罗盘',
+  camera: t('相机'), glider: t('滑翔翼'), lantern: t('提灯'), rod: t('钓竿'), fins: t('脚蹼'), shovel: t('小铁铲'), boots: t('弹跳靴'), compass: t('星屑罗盘'),
 };

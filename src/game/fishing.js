@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { resolveAnchor } from '../world/world.js';
 import { FISH, CODEX } from './content.js';
+import { t as tr } from '../i18n.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -19,7 +20,7 @@ export class Fishing {
       const spot = { ...def, level, rip };
       game.interact.add({
         pos: { x: def.x, y: level, z: def.z }, radius: 8, height: 6, priority: 1,
-        label: () => (game.state.data.abilities.rod && game.player.mode === 'ground' ? '钓鱼' : null),
+        label: () => (game.state.data.abilities.rod && game.player.mode === 'ground' ? tr('钓鱼') : null),
         action: () => this.fish(spot),
       });
       return spot;
@@ -68,8 +69,8 @@ export class Fishing {
     g.audio.play('splash');
     this.ui.hidden = false;
     $('.bar', this.ui).hidden = true;
-    $('.fish-title', this.ui).textContent = '等待鱼儿上钩……';
-    $('.fish-hint', this.ui).textContent = '按 E 收竿';
+    $('.fish-title', this.ui).textContent = tr('等待鱼儿上钩……');
+    $('.fish-hint', this.ui).textContent = tr('按 E 收竿');
     let result = 'cancel';
     try {
       const wait = 1.8 + Math.random() * 3.5;
@@ -81,8 +82,8 @@ export class Fishing {
         if (g.input.hit('KeyE', 'Escape')) throw new Error('cancel');
       }
       g.audio.play('bite');
-      $('.fish-title', this.ui).textContent = '！！！ 咬钩了！';
-      $('.fish-hint', this.ui).textContent = '快按 E！';
+      $('.fish-title', this.ui).textContent = tr('！！！ 咬钩了！');
+      $('.fish-hint', this.ui).textContent = tr('快按 E！');
       this.bobber.position.y = spot.level - 0.2;
       t = 0;
       let hooked = false;
@@ -98,8 +99,8 @@ export class Fishing {
       result = 'catch';
       this.caught(fish);
     } catch (e) {
-      if (result === 'miss') g.hud.toast('鱼跑掉了……下次要快一点按 E。');
-      if (result === 'escape') { g.audio.play('fail'); g.hud.toast('线断了，鱼逃走了！'); }
+      if (result === 'miss') g.hud.toast(tr('鱼跑掉了……下次要快一点按 E。'));
+      if (result === 'escape') { g.audio.play('fail'); g.hud.toast(tr('线断了，鱼逃走了！')); }
     }
     this.ui.hidden = true;
     this.bobber.visible = false; this.line.visible = false;
@@ -113,7 +114,7 @@ export class Fishing {
     const g = this.g;
     const bar = $('.bar', this.ui), zone = $('.zone', this.ui), cur = $('.cursor', this.ui);
     bar.hidden = false;
-    $('.fish-title', this.ui).textContent = '收线！';
+    $('.fish-title', this.ui).textContent = tr('收线！');
     let hits = 0, misses = 0;
     const width = 0.42 - fish.diff * 0.38;
     const speed = 0.8 + fish.diff * 1.6;
@@ -121,7 +122,7 @@ export class Fishing {
     let zx = Math.random() * (1 - width);
     const show = () => {
       zone.style.left = zx * 100 + '%'; zone.style.width = width * 100 + '%';
-      $('.fish-hint', this.ui).textContent = `指针在绿色区域时按 E · 成功 ${hits}/3 · 失误 ${misses}/2`;
+      $('.fish-hint', this.ui).textContent = tr('指针在绿色区域时按 E · 成功 {0}/3 · 失误 {1}/2', [hits, misses]);
     };
     show();
     while (hits < 3 && misses < 2) {
@@ -146,11 +147,11 @@ export class Fishing {
     d.items.fish[fish.id] = (d.items.fish[fish.id] || 0) + 1;
     const isNew = g.state.add('codex', fish.id);
     g.audio.play('fanfare');
-    g.hud.banner(`钓到了 ${info.name}！`, isNew ? '图鉴新增一条' : info.desc, 3000);
+    g.hud.banner(tr('钓到了 {0}！', [info.name]), isNew ? tr('图鉴新增一条') : info.desc, 3000);
     g.fx.emit(this.bobber.position.x, this.bobber.position.y + 0.5, this.bobber.position.z, 30, { color: 0x9fd3ff, speed: 4, gravity: 6 });
     if (fish.id === 'golden') {
       setTimeout(() => {
-        g.hud.toast('金鳞鱼的嘴里衔着一颗星屑！');
+        g.hud.toast(tr('金鳞鱼的嘴里衔着一颗星屑！'));
         g.collect.awardShard('golden_fish');
       }, 1800);
     }

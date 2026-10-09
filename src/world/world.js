@@ -7,6 +7,9 @@ import { Sky } from './sky.js';
 import { Colliders } from './colliders.js';
 import { StructureBuilder, baseY } from './structures.js';
 import { scatterWorld } from './scatter.js';
+import { Frontier } from './frontier.js';
+import { Grass } from './grass.js';
+import { Ambient } from './ambient.js';
 import { resolveContent } from '../game/content.js';
 
 export function buildWorld(scene, renderer) {
@@ -102,8 +105,11 @@ export function buildWorld(scene, renderer) {
   const campfires = content.campfires.map((c) => ({ ...c, ...sb.campfire(c.x, c.z) }));
 
   const scatter = scatterWorld(scene, colliders, exclusions, codexSpots);
+  const frontier = new Frontier(scene, colliders);
+  const grass = new Grass(scene, colliders);
+  const ambient = new Ambient(scene);
 
-  return { content, colliders, sky, water, structures: sb, anchors: A, lighthouse: lh, campfires, codexSpots, lamps, scatter };
+  return { content, colliders, sky, water, structures: sb, anchors: A, lighthouse: lh, campfires, codexSpots, lamps, scatter, frontier, grass, ambient };
 }
 
 export function resolveAnchor(item, anchors) {

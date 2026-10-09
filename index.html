@@ -11,6 +11,7 @@
   <div id="ui">
     <div id="dark-vignette"></div>
     <div id="hud" hidden>
+      <div id="hp-wrap"><div class="hp-ico">♥</div><div id="hp-track"><div id="hp-ghost"></div><div id="hp-fill"></div><span id="hp-text"></span></div></div>
       <div id="counters">
         <div class="ctr" id="c-shard"><span class="ico">⭐</span><b>0</b><i>/30</i></div>
         <div class="ctr" id="c-feather"><span class="ico">🪶</span><b>0</b><i>/15</i></div>
@@ -24,21 +25,23 @@
       </svg>
       <div id="prompt" hidden><kbd>E</kbd><span></span></div>
       <div id="race-hud" hidden><div id="race-title"></div><div id="race-time"></div></div>
-      <div id="keys-hint">WASD 移动 · 空格 跳跃 · Shift 冲刺 · E 互动 · Tab 菜单 · 点击画面锁定视角</div>
+      <div id="keys-hint" data-i18n="WASD 移动 · 空格 跳跃 · Shift 冲刺 · 左键/J 攻击 · Q 翻滚 · E 互动 · Tab 菜单 · 点击画面锁定视角">WASD 移动 · 空格 跳跃 · Shift 冲刺 · 左键/J 攻击 · Q 翻滚 · E 互动 · Tab 菜单 · 点击画面锁定视角</div>
       <div id="tools-hint"></div>
     </div>
+    <div id="bars"></div>
+    <div id="dmg-layer"></div>
     <div id="toasts"></div>
     <div id="big-banner"><div class="t1"></div><div class="t2"></div></div>
     <div id="viewfinder" hidden>
       <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-      <div class="vf-hint">左键 拍照 · 滚轮 变焦 · C 退出</div>
+      <div class="vf-hint" data-i18n="左键 拍照 · 滚轮 变焦 · C 退出">左键 拍照 · 滚轮 变焦 · C 退出</div>
     </div>
     <div id="flash"></div>
     <div id="dialog" hidden>
       <div class="name"></div>
       <div class="text"></div>
       <div class="choices"></div>
-      <div class="chat" hidden><input type="text" maxlength="120" placeholder="想说什么？（回车发送，Esc 结束）"/></div>
+      <div class="chat" hidden><input type="text" maxlength="120" placeholder="想说什么？（回车发送，Esc 结束）" data-i18n-ph="想说什么？（回车发送，Esc 结束）"/></div>
       <div class="next">▼</div>
     </div>
     <div id="fishing" hidden>
@@ -50,19 +53,20 @@
       <div class="menu-box">
         <div class="tabs"></div>
         <div class="tab-body"></div>
-        <div class="menu-foot">Tab / Esc 关闭</div>
+        <div class="menu-foot" data-i18n="Tab / Esc 关闭">Tab / Esc 关闭</div>
       </div>
     </div>
     <div id="title">
       <div class="title-inner">
-        <div class="logo">星屑群岛</div>
-        <div class="sub">Stardust Isles</div>
-        <div class="loading" id="loading">正在生成群岛… <span id="load-pct">0%</span></div>
+        <div class="logo" data-i18n="星屑群岛">星屑群岛</div>
+        <div class="sub" data-i18n="Stardust Isles">Stardust Isles</div>
+        <div class="loading" id="loading"><span data-i18n="正在生成群岛…">正在生成群岛…</span> <span id="load-pct">0%</span></div>
         <div class="buttons" hidden>
-          <button id="btn-continue" hidden>继续旅程</button>
-          <button id="btn-new">新的旅程</button>
+          <button id="btn-continue" hidden data-i18n="继续旅程">继续旅程</button>
+          <button id="btn-new" data-i18n="新的旅程">新的旅程</button>
         </div>
-        <div class="credits">一款探索收集小游戏 · 所有模型、音乐和音效均由代码生成</div>
+        <div class="credits" data-i18n="一款探索收集小游戏 · 所有模型、音乐和音效均由代码生成">一款探索收集小游戏 · 所有模型、音乐和音效均由代码生成</div>
+        <div class="lang-switch"><button data-lang="zh">中文</button><button data-lang="en">English</button></div>
       </div>
     </div>
     <div id="fade"></div>

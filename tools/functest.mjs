@@ -16,7 +16,7 @@ await page.reload();
 await page.waitForFunction(() => !document.querySelector('.buttons').hidden, null, { timeout: 240000 });
 await page.click('#btn-new');
 await page.waitForTimeout(1500);
-await page.evaluate(() => { const g = window.__game; g.state.data.settings.shadows = false; g.applySettings(); g.renderer.setPixelRatio(1); });
+await page.evaluate(() => { const g = window.__game; g.state.data.settings.shadows = false; g.state.data.settings.quality = 'low'; g.applySettings(); g.renderer.setPixelRatio(1); });
 
 const results = [];
 const check = (name, ok, info = '') => { results.push(`${ok ? 'PASS' : 'FAIL'}  ${name} ${info}`); };

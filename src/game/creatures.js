@@ -4,8 +4,30 @@ import { createAnimal } from '../player/character.js';
 import { groundHeight, waterLevel, regionWeights } from '../world/terrain.js';
 import { LAKE, DARK_FOREST, MOUNTAIN, REGIONS } from '../world/layout.js';
 import { angleLerp, mulberry32 } from '../core/math.js';
+import { t } from '../i18n.js';
 
 const rnd = mulberry32(2024);
+
+// Ground animals can be hit: they get health bars, flee when hurt, and "faint" into starlight
+// (respawning at home a while later) instead of dying.
+const STATS = {
+  sheep: { name: t('绵羊'), hp: 30, radius: 0.6, height: 1.3 },
+  deer: { name: t('小鹿'), hp: 45, radius: 0.6, height: 2.2 },
+  fox: { name: t('狐狸'), hp: 35, radius: 0.5, height: 1.1 },
+  goat: { name: t('山羊'), hp: 50, radius: 0.55, height: 1.5 },
+  crab: { name: t('螃蟹'), hp: 15, radius: 0.45, height: 0.5 },
+  frog: { name: t('青蛙'), hp: 10, radius: 0.3, height: 0.4 },
+  lizard: { name: t('蜥蜴'), hp: 12, radius: 0.3, height: 0.3 },
+};
+const WILD = {
+  sheep: { wander: 10, speed: 0.9 },
+  deer: { flee: 14, speed: 1.6, wander: 18 },
+  fox: { flee: 9, speed: 2.4, wander: 20 },
+  goat: { wander: 8, speed: 1.0 },
+  crab: { mode: 'crab', speed: 1.2, wander: 5 },
+  frog: { mode: 'hop', wander: 4, speed: 1.2 },
+  lizard: { mode: 'dart', wander: 6, speed: 3 },
+};
 
 function findSpot(cx, cz, r, ok, tries = 60) {
   for (let i = 0; i < tries; i++) {
@@ -29,9 +51,7 @@ export class Creatures {
         obj.position.set(s.x, groundHeight(s.x, s.z), s.z);
         obj.rotation.y = rnd() * 6.28;
         game.scene.add(obj);
-        const c = { kind, obj, home: s, r: opts.wander ?? 12, speed: opts.speed ?? 1.5, t: rnd() * 5, target: null, mode: opts.mode || 'wander', when: opts.when, phase: rnd() * 10, flee: opts.flee };
-        this.list.push(c);
-        game.codexLive.push({ id: opts.codex || kind, obj, range: opts.range, dy: opts.dy });
+        this._make(kind, obj, s, opts);
       }
     };
     const pen = game.content.pen;
@@ -70,11 +90,78 @@ export class Creatures {
     }
   }
 
+  _make(kind, obj, home, opts) {
+    const c = { kind, obj, home: { x: home.x, z: home.z }, r: opts.wander ?? 12, speed: opts.speed ?? 1.5, t: rnd() * 5, target: null, mode: opts.mode || 'wander', when: opts.when, phase: rnd() * 10, flee: opts.flee };
+    const st = STATS[kind];
+    if (st && c.mode !== 'perch') {
+      Object.assign(c, { name: st.name, maxHp: st.hp, hp: st.hp, radius: st.radius, height: st.height, level: 1, hostile: false, alive: true, targetable: true, fleeT: 0, lastHit: -99, kx: 0, kz: 0 });
+      c.onHit = (dmg, dir, info) => this._hit(c, dmg, dir, info);
+    }
+    c.codex = { id: opts.codex || kind, obj, range: opts.range, dy: opts.dy };
+    this.list.push(c);
+    this.g.codexLive.push(c.codex);
+    return c;
+  }
+
+  // Wildlife on the far isles (spawned/despawned with their chunk).
+  spawnWild(kind, x, z, tag) {
+    const h = groundHeight(x, z);
+    if (h < waterLevel(x, z) + 0.4) return null;
+    const obj = createAnimal(kind);
+    obj.position.set(x, h, z);
+    obj.rotation.y = rnd() * 6.28;
+    this.g.scene.add(obj);
+    const c = this._make(kind, obj, { x, z }, WILD[kind] || {});
+    c.tag = tag;
+    return c;
+  }
+
+  despawnTag(tag) {
+    for (let i = this.list.length - 1; i >= 0; i--) {
+      const c = this.list[i];
+      if (c.tag !== tag) continue;
+      this.g.scene.remove(c.obj);
+      const k = this.g.codexLive.indexOf(c.codex);
+      if (k >= 0) this.g.codexLive.splice(k, 1);
+      this.list.splice(i, 1);
+    }
+  }
+
+  targets() {
+    const out = [];
+    for (const c of this.list) if (c.targetable && c.alive && c.obj.visible) out.push(c);
+    return out;
+  }
+
+  _hit(c, dmg, dir, info) {
+    const g = this.g;
+    c.hp -= dmg;
+    c.lastHit = g.clock;
+    c.fleeT = 6;
+    c.kx += dir.x * (info.knock ?? 5) * 1.3; c.kz += dir.z * (info.knock ?? 5) * 1.3;
+    if (c.kind === 'sheep') g.audio.play('sheep');
+    if (c.hp <= 0) {
+      c.alive = false;
+      c.obj.visible = false;
+      c.respawnT = c.tag ? Infinity : 45;
+      const p = c.obj.position;
+      g.fx.emit(p.x, p.y + c.height * 0.5, p.z, 40, { color: 0xfff2a8, speed: 4, gravity: -2.5, size: 0.4, life: 1.3 });
+      g.fx.emit(p.x, p.y + c.height * 0.5, p.z, 16, { color: 0xffffff, speed: 2, gravity: -4, size: 0.6, life: 1.0 });
+    }
+  }
+
   update(dt, t) {
     const g = this.g, p = g.player.pos;
     const night = g.sky.night > 0.5, rain = g.sky.rain > 0.4;
     for (const c of this.list) {
       const o = c.obj;
+      if (c.targetable && !c.alive) {
+        c.respawnT -= dt;
+        if (c.respawnT <= 0) {
+          c.alive = true; c.hp = c.maxHp; c.fleeT = 0;
+          o.position.set(c.home.x, groundHeight(c.home.x, c.home.z), c.home.z);
+        } else { o.visible = false; continue; }
+      }
       const vis = c.when === 'day' ? !night && !rain : c.when === 'night' ? night : c.when === 'rain' ? rain : true;
       o.visible = vis;
       if (!vis) continue;
@@ -108,10 +195,19 @@ export class Creatures {
       }
       // Ground wanderers
       let speed = c.speed;
-      if (c.flee && dp < c.flee) {
+      if (c.targetable) {
+        if (c.fleeT > 0) c.fleeT -= dt;
+        if (Math.abs(c.kx) + Math.abs(c.kz) > 0.05) {
+          const nx = o.position.x + c.kx * dt, nz = o.position.z + c.kz * dt;
+          if (groundHeight(nx, nz) > waterLevel(nx, nz) + 0.1) { o.position.x = nx; o.position.z = nz; }
+          c.kx *= Math.max(0, 1 - dt * 6); c.kz *= Math.max(0, 1 - dt * 6);
+        }
+        if (c.hp < c.maxHp && c.fleeT <= 0 && g.clock - c.lastHit > 20) c.hp = c.maxHp;
+      }
+      if ((c.flee && dp < c.flee) || c.fleeT > 0) {
         const ax = o.position.x - p.x, az = o.position.z - p.z, l = Math.hypot(ax, az) || 1;
         c.target = { x: o.position.x + (ax / l) * 10, z: o.position.z + (az / l) * 10 };
-        speed = c.speed * 4;
+        speed = Math.max(c.speed * 4, c.fleeT > 0 ? 5.5 : 0);
         c.t = 2;
       } else if (c.t <= 0 || !c.target) {
         c.t = 2 + rnd() * 5;

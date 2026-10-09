@@ -1,13 +1,17 @@
 {
   "name": "stardust-isles",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "A cozy 3D exploration & collection game for the browser. Every model, sound and song is generated in code (Three.js).",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
     "start": "node server/server.js",
-    "smoke": "node tools/smoke.mjs"
+    "test": "node tools/functest.mjs http://localhost:8080/",
+    "test:combat": "node tools/combattest.mjs http://localhost:8080/",
+    "i18n:check": "node tools/i18n/extract.mjs && node tools/i18n/shadow.mjs",
+    "smoke": "node tools/smoke.mjs http://localhost:8080/"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.132.1",

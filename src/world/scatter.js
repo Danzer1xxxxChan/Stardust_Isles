@@ -1,7 +1,7 @@
 // Seeded vegetation and rock scattering into grouped InstancedMeshes (grouped spatially so culling works).
 import * as THREE from 'three';
 import * as P from './props.js';
-import { groundHeight, groundNormal, regionWeights, waterLevel, coastFactor } from './terrain.js';
+import { groundHeight, groundNormal, regionWeights, waterLevel, coastFactor, frontierWeight } from './terrain.js';
 import { WORLD_HALF, DARK_FOREST } from './layout.js';
 import { createNoise2D, hash2, smoothstep } from '../core/math.js';
 
@@ -9,30 +9,33 @@ const GROUP = 150;
 const clump = createNoise2D(31337);
 const clump2 = createNoise2D(5151);
 
+let LIB = null;
+export function library() { return LIB || (LIB = makeLibrary()); }
+
 function makeLibrary() {
   return {
-    oak: { variants: [P.oak(1), P.oak(2), P.oak(3, 0x7db84f)], col: 0.45, shadow: true, codex: 'oak' },
-    pine: { variants: [P.pine(1), P.pine(2, 0x3a7546)], col: 0.35, shadow: true, codex: 'pine' },
-    darkpine: { variants: [P.pine(3, 0x2c5e45, false, 1.5), P.pine(4, 0x2a5540, false, 1.35)], col: 0.4, shadow: true, codex: 'darkpine' },
-    snowpine: { variants: [P.pine(5, 0x355f4a, true, 1.1), P.pine(6, 0x3a6650, true, 0.9)], col: 0.35, shadow: true, codex: 'snowpine' },
-    palm: { variants: [P.palm(1), P.palm(2)], col: 0.3, shadow: true, codex: 'palm' },
+    oak: { sway: true, variants: [P.oak(1), P.oak(2), P.oak(3, 0x7db84f)], col: 0.45, shadow: true, codex: 'oak' },
+    pine: { sway: true, variants: [P.pine(1), P.pine(2, 0x3a7546)], col: 0.35, shadow: true, codex: 'pine' },
+    darkpine: { sway: true, variants: [P.pine(3, 0x2c5e45, false, 1.5), P.pine(4, 0x2a5540, false, 1.35)], col: 0.4, shadow: true, codex: 'darkpine' },
+    snowpine: { sway: true, variants: [P.pine(5, 0x355f4a, true, 1.1), P.pine(6, 0x3a6650, true, 0.9)], col: 0.35, shadow: true, codex: 'snowpine' },
+    palm: { sway: true, variants: [P.palm(1), P.palm(2)], col: 0.3, shadow: true, codex: 'palm' },
     cactus: { variants: [P.cactus(1), P.cactus(2), P.cactus(3)], col: 0.45, shadow: true, codex: 'cactus' },
     deadtree: { variants: [P.deadTree(1), P.deadTree(2)], col: 0.25, shadow: true },
-    bush: { variants: [P.bush(1), P.bush(2, 0x4f8f3e, true)], shadow: true },
+    bush: { sway: true, variants: [P.bush(1), P.bush(2, 0x4f8f3e, true)], shadow: true },
     rock: { variants: [P.rock(1), P.rock(2), P.rock(3, 0x8a857e, 0.6)], col: 0.8, shadow: true },
     redrock: { variants: [P.rock(4, 0xb4613b), P.rock(5, 0xa65535, 0.7)], col: 0.8, shadow: true },
-    grass: { variants: [P.grassTuft(0x7fbf4f), P.grassTuft(0x5f9e45)], shadow: false },
-    flowers: { variants: [P.flowers(0xf7d74a), P.flowers(0xf17aa6), P.flowers(0x9ab8ff), P.flowers(0xffffff)], shadow: false, codex: 'flower' },
-    sunflower: { variants: [P.sunflower()], shadow: false, codex: 'sunflower' },
+    grass: { sway: true, variants: [P.grassTuft(0x7fbf4f), P.grassTuft(0x5f9e45)], shadow: false },
+    flowers: { sway: true, variants: [P.flowers(0xf7d74a), P.flowers(0xf17aa6), P.flowers(0x9ab8ff), P.flowers(0xffffff)], shadow: false, codex: 'flower' },
+    sunflower: { sway: true, variants: [P.sunflower()], shadow: false, codex: 'sunflower' },
     mushroom: { variants: [P.mushroom(), P.mushroom(0xc77d2e)], shadow: false, codex: 'mushroom' },
-    reeds: { variants: [P.reeds()], shadow: false, codex: 'reeds' },
+    reeds: { sway: true, variants: [P.reeds()], shadow: false, codex: 'reeds' },
     crystal: { variants: [P.crystal(1), P.crystal(2, 0x8fd3ff)], col: 0.5, shadow: true, glow: 0x9a6bff, codex: 'crystal' },
     coral: { variants: [P.coral(1), P.coral(2)], shadow: false, codex: 'coral' },
   };
 }
 
 export function scatterWorld(scene, colliders, exclusions, codexRegistry) {
-  const lib = makeLibrary();
+  const lib = library();
   const buckets = new Map();
   const nrm = { x: 0, y: 1, z: 0 };
 
@@ -61,6 +64,7 @@ export function scatterWorld(scene, colliders, exclusions, codexRegistry) {
       seed++;
       const jx = x + (hash2(seed, 1) - 0.5) * STEP * 0.9;
       const jz = z + (hash2(seed, 2) - 0.5) * STEP * 0.9;
+      if (frontierWeight(jx, jz) >= 0.6) continue; // far-isle vegetation is streamed by frontier.js
       const h = groundHeight(jx, jz);
       const wl = waterLevel(jx, jz);
       const r = hash2(seed, 3);
@@ -129,8 +133,8 @@ export function scatterWorld(scene, colliders, exclusions, codexRegistry) {
   const meshes = [];
   for (const b of buckets.values()) {
     const def = lib[b.type];
-    let mat = P.propMaterial;
-    if (def.glow) mat = glowMats[b.type] || (glowMats[b.type] = P.glowMaterial(def.glow, 0.7));
+    let mat = def.sway ? P.vegMaterial : P.propMaterial;
+    if (def.glow) mat = glowMats[b.type] || (glowMats[b.type] = P.glowMaterial(def.glow, 1.6));
     const im = new THREE.InstancedMesh(def.variants[b.v], mat, b.items.length);
     b.items.forEach((it, i) => {
       dummy.position.set(it.x, it.y, it.z);

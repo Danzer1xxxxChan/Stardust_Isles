@@ -2,3 +2,6 @@ node_modules
 dist
 tools/out
 .env
+__pycache__/
+*.log
+.DS_Store

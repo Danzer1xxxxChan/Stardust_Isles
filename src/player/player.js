@@ -12,7 +12,7 @@ export class Player {
   constructor(scene, colliders, state) {
     this.state = state;
     this.col = colliders;
-    this.char = createCharacter();
+    this.char = createCharacter({ sword: true, gloves: 0x6b4a30 });
     scene.add(this.char.root);
     this.pos = new THREE.Vector3();
     this.vel = new THREE.Vector3();
@@ -35,6 +35,11 @@ export class Player {
     this.airTime = 0;
     this._n = { x: 0, y: 1, z: 0 };
     this.lanternOn = false;
+    // Combat hooks (driven by Combat): forced velocity, movement scale, attack pose, hurt flinch.
+    this.dash = null;
+    this.moveScale = 1;
+    this.atkPose = null;
+    this.hurtT = 0;
   }
 
   get maxStamina() { return 4.5 + this.state.data.feathers.length * 1.1; }
@@ -68,7 +73,7 @@ export class Player {
     const max = this.maxStamina;
     if (this.frozen) {
       this.vel.set(0, 0, 0);
-      this.char.animate({ mode: this.animOverride || 'idle', speed: 0, dt, t: this.time });
+      this.char.animate({ mode: this.animOverride || 'idle', speed: 0, dt, t: this.time, atk: this.atkPose });
       this._syncModel(dt);
       return;
     }
@@ -87,14 +92,17 @@ export class Player {
     switch (this.mode) {
       case 'ground': {
         const depth = wl - p.y;
-        const wade = depth > 0.3 ? 0.6 : 1;
-        const sp = (sprint ? SPRINT : WALK) * wade;
+        const wade = depth > 0.55 ? 0.6 : 1;
+        const sp = (sprint ? SPRINT : WALK) * wade * this.moveScale;
         v.x = damp(v.x, mx * sp, 12, dt);
         v.z = damp(v.z, mz * sp, 12, dt);
+        if (this.dash) { v.x = this.dash.vx; v.z = this.dash.vz; }
         let nx = p.x + v.x * dt, nz = p.z + v.z * dt;
         const ahead = this.floorAt(nx, nz, p.y + 0.6);
         if (ahead.terrain && ahead.h > p.y + 0.04 && this.steepAt(nx, nz)) {
-          if (mlen > 0.1 && this.stamina > 0.05) { this.mode = 'climb'; this.onEvent('grab'); break; }
+          // Step onto the steep face before grabbing it; otherwise climb sees the flat triangle
+          // underfoot, drops back to ground, and the two modes ping-pong at the cliff base.
+          if (mlen > 0.1 && this.stamina > 0.05) { p.x = nx; p.z = nz; p.y = ahead.h; this.mode = 'climb'; this.onEvent('grab'); break; }
           nx = p.x; nz = p.z; v.x = 0; v.z = 0;
         }
         p.x = nx; p.z = nz;
@@ -104,13 +112,13 @@ export class Player {
         p.y = fl.h;
         v.y = 0;
         if (fl.terrain && this.steepAt(p.x, p.z)) { this.mode = 'slide'; break; }
-        if (mlen > 0.1) this.yaw = angleLerp(this.yaw, Math.atan2(mx, mz), Math.min(1, dt * 12));
+        if (mlen > 0.1 && !this.dash && this.moveScale > 0.5) this.yaw = angleLerp(this.yaw, Math.atan2(mx, mz), Math.min(1, dt * 12));
         this.stamina = Math.min(max, this.stamina + dt * 3);
         animSpeed = Math.hypot(v.x, v.z);
         animMode = animSpeed > 0.4 ? 'walk' : 'idle';
         this.stepPhase += animSpeed * dt;
         if (this.stepPhase > 1.6) { this.stepPhase = 0; this.onEvent('step', depth > 0.2 ? 'water' : 'ground'); }
-        if (jumpPressed) {
+        if (jumpPressed && !this.dash) {
           v.y = 9.2; this.mode = 'air'; this.jumps = 1; this.airTime = 0;
           this.onEvent('jump');
         }
@@ -153,7 +161,7 @@ export class Player {
         const t = groundHeight(nx, nz);
         if (t > p.y + 0.3) {
           if (this.steepAt(nx, nz)) {
-            if (mlen > 0.1 && this.stamina > 0.05) { this.mode = 'climb'; v.set(0, 0, 0); this.onEvent('grab'); break; }
+            if (mlen > 0.1 && this.stamina > 0.05) { p.x = nx; p.z = nz; p.y = Math.max(p.y, t); this.mode = 'climb'; v.set(0, 0, 0); this.onEvent('grab'); break; }
             nx = p.x; nz = p.z; v.x = 0; v.z = 0;
           }
         }
@@ -256,13 +264,12 @@ export class Player {
       }
     }
     if (this.mode !== 'swim') this.cold = 0;
-    // World bounds
-    const lim = 440;
-    p.x = clamp(p.x, -lim, lim);
-    p.z = clamp(p.z, -lim, lim);
+    if (this.dash) { this.dash.t -= dt; if (this.dash.t <= 0) this.dash = null; }
+    // The world is unbounded now: the far isles stream in wherever you go.
     if (this.restrict) this.restrict(p, false);
+    if (this.hurtT > 0) { this.hurtT -= dt; if (!this.atkPose) animMode = 'hurt'; }
     if (this.animOverride) animMode = this.animOverride;
-    this.char.animate({ mode: animMode, speed: animSpeed, dt, t: this.time });
+    this.char.animate({ mode: animMode, speed: animSpeed, dt, t: this.time, atk: this.atkPose });
     this._syncModel(dt);
   }
 

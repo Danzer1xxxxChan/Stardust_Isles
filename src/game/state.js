@@ -17,8 +17,9 @@ export function defaultData() {
     maps: [], dug: [],
     reveal: '',
     met: [],
+    farChests: [], farthest: 0,
     ending: false,
-    settings: { volume: 0.8, music: 0.5, sensitivity: 1, invertY: false, shadows: true, aiChat: true },
+    settings: { volume: 0.8, music: 0.5, sensitivity: 1, invertY: false, shadows: true, aiChat: true, quality: 'high' },
   };
 }
 

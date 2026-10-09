@@ -6,6 +6,7 @@ import { groundHeight, highestPoint } from '../world/terrain.js';
 import { LAKE, LAKE_ISLANDS, ISLETS } from '../world/layout.js';
 import { createAnimal } from '../player/character.js';
 import { angleLerp, damp } from '../core/math.js';
+import { t as tr } from '../i18n.js';
 
 const { Cyl, Cone, Box, Ico, Sph } = prim;
 const G = (x, z, dy = 0) => ({ x, y: groundHeight(x, z) + dy, z });
@@ -49,9 +50,9 @@ export class Challenges {
   _buildCourses() {
     const g = this.g;
     const defs = [
-      { id: 'ring_canyon1', name: '峡谷光环 · 北', start: highestPoint(212, -67, 10), to: { x: 262, z: 10 }, n: 6 },
-      { id: 'ring_canyon2', name: '峡谷光环 · 东', start: highestPoint(298, -15, 10), to: { x: 225, z: 50 }, n: 6 },
-      { id: 'ring_coast', name: '海岸光环', start: g.content.mesaS, to: { x: ISLETS[0].x, z: ISLETS[0].z }, n: 7 },
+      { id: 'ring_canyon1', name: tr('峡谷光环 · 北'), start: highestPoint(212, -67, 10), to: { x: 262, z: 10 }, n: 6 },
+      { id: 'ring_canyon2', name: tr('峡谷光环 · 东'), start: highestPoint(298, -15, 10), to: { x: 225, z: 50 }, n: 6 },
+      { id: 'ring_coast', name: tr('海岸光环'), start: g.content.mesaS, to: { x: ISLETS[0].x, z: ISLETS[0].z }, n: 7 },
     ];
     this.courses = defs.map((d) => this._makeCourse(d));
   }
@@ -105,7 +106,7 @@ export class Challenges {
     const course = { ...def, rings, ux, uz, limit: Math.ceil(dist / 9 + 10), totem: { x: tx, y: ty, z: tz } };
     g.interact.add({
       pos: { x: tx, y: ty, z: tz }, radius: 3,
-      label: () => (this.activeCourse ? null : (g.state.has('shards', def.id) ? '敲响风铃（再挑战一次）' : '敲响风铃')),
+      label: () => (this.activeCourse ? null : (g.state.has('shards', def.id) ? tr('敲响风铃（再挑战一次）') : tr('敲响风铃'))),
       action: async () => this.startCourse(course),
     });
     return course;
@@ -113,14 +114,14 @@ export class Challenges {
 
   async startCourse(c) {
     const g = this.g;
-    if (!g.state.data.abilities.glider) { g.hud.toast('光环飘在半空中……需要滑翔翼才能穿过它们。'); return; }
+    if (!g.state.data.abilities.glider) { g.hud.toast(tr('光环飘在半空中……需要滑翔翼才能穿过它们。')); return; }
     this.activeCourse = c;
     c.next = 0;
     c.time = c.limit;
     for (const r of c.rings) { r.passed = false; r.mesh.visible = true; r.mesh.material.color.set(0x9ff3ff); r.prevSide = null; }
     g.audio.play('ring');
     g.audio.setMood('tense');
-    g.hud.toast('在时间内按顺序穿过所有光环！');
+    g.hud.toast(tr('在时间内按顺序穿过所有光环！'));
   }
 
   _endCourse(win) {
@@ -132,10 +133,10 @@ export class Challenges {
     if (win) {
       g.audio.play('fanfare');
       const last = c.rings[c.rings.length - 1];
-      if (!g.collect.awardShard(c.id, last)) g.hud.banner('挑战成功！', '');
+      if (!g.collect.awardShard(c.id, last)) g.hud.banner(tr('挑战成功！'), '');
     } else {
       g.audio.play('fail');
-      g.hud.toast('时间到了……回到风铃柱再试一次吧。');
+      g.hud.toast(tr('时间到了……回到风铃柱再试一次吧。'));
     }
   }
 
@@ -196,8 +197,8 @@ export class Challenges {
     P.y0 = y0;
     g.interact.add({
       pos: { x: ru.altar.x, y: ru.altar.y - 1, z: ru.altar.z + 1.6 }, radius: 2.6,
-      label: () => (P.solved ? null : '重置石箱'),
-      action: async () => { this._resetBoxes(); g.audio.play('push'); g.hud.toast('石箱回到了原位。'); },
+      label: () => (P.solved ? null : tr('重置石箱')),
+      action: async () => { this._resetBoxes(); g.audio.play('push'); g.hud.toast(tr('石箱回到了原位。')); },
     });
     this._checkPlates(true);
   }
@@ -222,7 +223,7 @@ export class Challenges {
       P.solved = true;
       g.state.flag('ruins_solved', true);
       g.audio.play('fanfare');
-      g.hud.toast('遗迹的祭坛亮了起来！');
+      g.hud.toast(tr('遗迹的祭坛亮了起来！'));
       g.collect.spawnShard('ruins_puzzle', g.world.anchors.ruinsAltar);
     }
   }
@@ -305,7 +306,7 @@ export class Challenges {
           if (set.sel[n.id] < 0) set.sel[n.id] = 0;
           g.interact.add({
             pos: { x: n.x, y: n.y, z: n.z }, radius: 2.4,
-            label: () => (set.solved ? null : '转动镜子'),
+            label: () => (set.solved ? null : tr('转动镜子')),
             action: async () => { set.sel[n.id] = (set.sel[n.id] + 1) % set.opts[n.id].length; g.audio.play('mirror'); this._traceMirrors(set); },
           });
         }
@@ -377,7 +378,7 @@ export class Challenges {
       g.state.flag(set.id + '_solved', true);
       if (!silent) {
         g.audio.play('fanfare');
-        g.hud.toast('光束点亮了水晶！');
+        g.hud.toast(tr('光束点亮了水晶！'));
         this.g.collect.awardShard(set.id, { x: tgt.x, y: tgt.y + 2, z: tgt.z });
       }
     }
@@ -386,7 +387,7 @@ export class Challenges {
   // ---------------- Constellation pedestals ----------------
   _buildPedestals() {
     const g = this.g;
-    const names = { swan: '天鹅座', hunter: '猎户座', dipper: '北斗七星' };
+    const names = { swan: tr('天鹅座'), hunter: tr('猎户座'), dipper: tr('北斗七星') };
     const order = ['swan', 'hunter', 'dipper'];
     this.ped = { seq: [], list: [] };
     for (const pd of g.content.pedestals) {
@@ -402,14 +403,14 @@ export class Challenges {
       this.ped.list.push(P);
       g.interact.add({
         pos: { x: pd.x, y, z: pd.z }, radius: 2.4,
-        label: () => (g.state.has('shards', 'stars') ? null : `触摸石台（${names[pd.id]}）`),
+        label: () => (g.state.has('shards', 'stars') ? null : tr('触摸石台（{0}）', [names[pd.id]])),
         action: async () => {
-          if (g.sky.night < 0.5) { g.hud.toast(`石台上刻着${names[pd.id]}。白天它没有任何反应。`); return; }
+          if (g.sky.night < 0.5) { g.hud.toast(tr('石台上刻着{0}。白天它没有任何反应。', [names[pd.id]])); return; }
           if (P.on) return;
           const want = order[this.ped.seq.length];
           if (pd.id !== want) {
             g.audio.play('fail');
-            g.hud.toast('星光熄灭了……顺序好像不对。');
+            g.hud.toast(tr('星光熄灭了……顺序好像不对。'));
             this.ped.seq = [];
             for (const q of this.ped.list) { q.on = false; q.top.material.emissiveIntensity = 0.1; q.beam.visible = false; }
             return;
@@ -418,7 +419,7 @@ export class Challenges {
           P.top.material.emissiveIntensity = 2.4; P.beam.visible = true;
           g.audio.play('star');
           if (this.ped.seq.length === 3) {
-            g.hud.toast('三道星光连成了一线！');
+            g.hud.toast(tr('三道星光连成了一线！'));
             const ob = g.content.observatory;
             await g.wait(0.8);
             g.collect.awardShard('stars', { x: ob.x, y: groundHeight(ob.x, ob.z) + 9, z: ob.z });
@@ -453,7 +454,7 @@ export class Challenges {
           f.done = true; g.state.flag('fox_done', true);
           g.fx.emit(o.position.x, o.position.y + 0.5, o.position.z, 40, { color: 0x9fe6ff, speed: 4 });
           o.visible = false;
-          g.hud.toast('星光狐消失了，它留下了什么东西……');
+          g.hud.toast(tr('星光狐消失了，它留下了什么东西……'));
           g.collect.spawnShard('fox', { x: o.position.x, y: o.position.y + 1.3, z: o.position.z });
           return;
         }
@@ -490,8 +491,8 @@ export class Challenges {
       const s = { i, obj, penned, following: false, home };
       g.interact.add({
         pos: obj.position, radius: 2.4,
-        label: () => (s.penned || s.following ? null : '带上走失的羊'),
-        action: async () => { s.following = true; g.audio.play('sheep'); g.hud.toast('羊跟在你身后了，把它带回米娅的羊圈吧。'); },
+        label: () => (s.penned || s.following ? null : tr('带上走失的羊')),
+        action: async () => { s.following = true; g.audio.play('sheep'); g.hud.toast(tr('羊跟在你身后了，把它带回米娅的羊圈吧。')); },
       });
       return s;
     });
@@ -520,8 +521,8 @@ export class Challenges {
           const q = g.state.quest('mia');
           if (!q.penned.includes(s.i)) q.penned.push(s.i);
           g.audio.play('sheep');
-          g.hud.toast(`羊回到了羊圈（${q.penned.length}/3）`);
-          if (q.penned.length === 3) g.hud.toast('三只羊都回来了！去告诉米娅吧。', 4000);
+          g.hud.toast(tr('羊回到了羊圈（{0}/3）', [q.penned.length]));
+          if (q.penned.length === 3) g.hud.toast(tr('三只羊都回来了！去告诉米娅吧。'), 4000);
           g.state.save();
         }
       } else if (s.penned) {
@@ -540,8 +541,8 @@ export class Challenges {
     const pl = g.player;
     this.race = { npc, start, t: 0, phase: 'count' };
     g.audio.setMood('tense');
-    for (const n of ['3', '2', '1']) { g.hud.banner(n, '目标：红石拱门', 900); g.audio.play('tick'); await g.wait(1); }
-    g.hud.banner('出发！', '', 800); g.audio.play('go');
+    for (const n of ['3', '2', '1']) { g.hud.banner(n, tr('目标：红石拱门'), 900); g.audio.play('tick'); await g.wait(1); }
+    g.hud.banner(tr('出发！'), '', 800); g.audio.play('go');
     this.race.phase = 'run';
     this.race.t = 0;
   }
@@ -555,7 +556,7 @@ export class Challenges {
     if (R.phase !== 'run') return;
     R.t += dt;
     const arch = g.world.anchors.arch, n = R.npc;
-    g.hud.setRace('峡谷赛跑', R.t.toFixed(1));
+    g.hud.setRace(tr('峡谷赛跑'), R.t.toFixed(1));
     const dx = arch.x - n.pos.x, dz = arch.z - n.pos.z, d = Math.hypot(dx, dz);
     const sp = 9.0 * dt;
     if (d > 2) {
@@ -573,14 +574,14 @@ export class Challenges {
       n.override = win ? 'idle' : 'cheer';
       if (win) {
         g.audio.play('fanfare');
-        g.hud.toast(`你赢了！用时 ${R.t.toFixed(1)} 秒`);
+        g.hud.toast(tr('你赢了！用时 {0} 秒', [R.t.toFixed(1)]));
         if (g.collect.awardShard('race', g.player.pos)) {
           g.state.add('hats', 'cap');
-          setTimeout(() => g.hud.toast('跳跳把他的跑步帽送给了你！'), 2500);
+          setTimeout(() => g.hud.toast(tr('跳跳把他的跑步帽送给了你！')), 2500);
         }
       } else {
         g.audio.play('fail');
-        g.hud.toast('跳跳：「哈哈，我赢啦！不服再来！」');
+        g.hud.toast(tr('跳跳：「哈哈，我赢啦！不服再来！」'));
       }
       await g.wait(3);
       const back = R.start;
