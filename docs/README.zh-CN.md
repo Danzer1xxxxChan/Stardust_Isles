@@ -121,3 +121,7 @@ tools/       functest.mjs / combattest.mjs（无头浏览器功能测试）、sm
 ```
 
 测试：先 `npm start`，再运行 `node tools/functest.mjs http://localhost:8080/`。脚本会在无头 Chromium 里模拟按键，跑完 19 项玩法检查。战斗和远方群岛用 `node tools/combattest.mjs http://localhost:8080/` 测试，截图巡游用 `node tools/shots.mjs <url> <shots.json>`。
+
+## 许可证
+
+本项目基于 [Apache License 2.0](../LICENSE) 开源。
