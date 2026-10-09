@@ -5,7 +5,7 @@
 **A cozy 3D island adventure in your browser, built entirely from code.**
 
 <a href="https://github.com/Danzer1xxxxChan/Stardust_Isles/releases/tag/v0.2.0"><img src="https://img.shields.io/badge/🎬_Trailer-Watch-EF4444?style=for-the-badge&labelColor=2B2F3A" alt="Trailer"></a>
-<a href="#setup"><img src="https://img.shields.io/badge/🎮_Play-in_your_browser-22C55E?style=for-the-badge&labelColor=2B2F3A" alt="Play"></a>
+<a href="https://game.danzechen.world/"><img src="https://img.shields.io/badge/🎮_Play-Online-22C55E?style=for-the-badge&labelColor=2B2F3A" alt="Play online"></a>
 <a href="https://threejs.org"><img src="https://img.shields.io/badge/Three.js-WebGL_2-6366F1?style=for-the-badge&labelColor=2B2F3A&logo=threedotjs&logoColor=white" alt="Three.js"></a>
 <br>
 <img src="https://img.shields.io/badge/📦_Asset_files-0-F59E0B?style=for-the-badge&labelColor=2B2F3A" alt="Zero asset files">
@@ -19,6 +19,9 @@
 A meteor shower has shattered the star inside the lighthouse on top of Frostpeak, and its pieces, the *stardust shards*, now lie scattered across the islands. Explore, help the islanders, unlock new abilities and gather 20 shards to relight the lighthouse. Then sail past the coast into an archipelago that never ends.
 
 <p align="center"><b>TL;DR</b>: a hand-crafted island plus an endless procedural world, with exploration, quests, puzzles and real-time combat, all in about 1 MB of JavaScript and no art, audio or texture files.</p>
+
+<h3 align="center">👉 <a href="https://game.danzechen.world/">Play now at game.danzechen.world</a></h3>
+<p align="center"><sub>No install needed · desktop browser with keyboard and mouse recommended</sub></p>
 
 ## ✨ Highlights
 
@@ -49,6 +52,12 @@ A meteor shower has shattered the star inside the lighthouse on top of Frostpeak
 <a id="setup"></a>
 
 ## ⚙️ Setup
+
+### 🌐 Play online
+
+Open **[game.danzechen.world](https://game.danzechen.world/)** in a desktop browser. No install is needed, and your progress is saved in the browser.
+
+### 💻 Run locally
 
 You need [Node.js](https://nodejs.org/) 18 or newer and a browser with WebGL 2. A dedicated GPU is recommended for the High and Ultra presets.
 
@@ -166,7 +175,7 @@ Built with [Three.js](https://threejs.org/) and [Vite](https://vitejs.dev/). The
 
 ---
 
-<p align="center">📖 <a href="docs/README.zh-CN.md">中文说明</a> · 📝 <a href="docs/UPGRADE_PLAN.md">Design notes (中文)</a></p>
+<p align="center">🎮 <a href="https://game.danzechen.world/">Play online</a> · 🎬 <a href="https://github.com/Danzer1xxxxChan/Stardust_Isles/releases/tag/v0.2.0">Trailer</a> · 📖 <a href="docs/README.zh-CN.md">中文说明</a> · 📝 <a href="docs/UPGRADE_PLAN.md">Design notes (中文)</a></p>
 
 <p align="center">If you enjoyed your trip to the isles, a star ⭐ would be greatly appreciated!</p>
 
