@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="docs/images/title.jpg" width="100%" alt="Stardust Isles">
-
-# ✨ Stardust Isles
+<img src="docs/images/hero.jpg" width="100%" alt="Stardust Isles: An Island Adventure">
 
 **A cozy 3D island adventure in your browser, built entirely from code.**
 
@@ -12,7 +10,7 @@
 <br>
 <img src="https://img.shields.io/badge/📦_Asset_files-0-F59E0B?style=for-the-badge&labelColor=2B2F3A" alt="Zero asset files">
 <img src="https://img.shields.io/badge/🌐_Language-English_|_中文-0EA5E9?style=for-the-badge&labelColor=2B2F3A" alt="English and Chinese">
-<a href="LICENSE"><img src="https://img.shields.io/badge/⚖️_License-Apache_2.0-8B5CF6?style=for-the-badge&labelColor=2B2F3A" alt="Apache 2.0"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/⚖️_License-MIT-8B5CF6?style=for-the-badge&labelColor=2B2F3A" alt="MIT License"></a>
 
 </div>
 
@@ -66,10 +64,25 @@ npm start                      # open http://localhost:8080
 |---|---|
 | 🌐 Language | **中文 / English** buttons on the title screen, or *Settings → Language* |
 | 🖥️ Graphics | *Settings → Graphics*: Low / Medium / High / Ultra |
-| 🔧 Other options | `PORT=3000 npm start` · `npm run dev` for hot reload · on a remote server, run `ssh -L 8080:localhost:8080 <server>` |
+| 🔧 Port & dev mode | `PORT=3000 npm start` · `npm run dev` for hot reload |
+| 🛰️ Remote server | `ssh -L 8080:localhost:8080 <server>`, then open `http://localhost:8080` locally |
 | 🤖 AI small talk *(optional)* | `ANTHROPIC_API_KEY=... npm start` lets you chat freely with the islanders. Everything else works without a key. |
 
 Progress is saved automatically in the browser.
+
+## 🎮 Controls
+
+| Key | Action |
+|---|---|
+| WASD / arrow keys | Move (walk into a steep slope to climb) |
+| Mouse | Look around (click to lock, or drag with the right button) · wheel to zoom |
+| Space | Jump · in mid-air: double jump / open the glider (hold) |
+| Shift | Sprint / swim faster |
+| Left click / J | Attack (3-hit combo, plunge attack in mid-air) |
+| Q | Dodge roll (brief invulnerability) |
+| E | Interact: talk, open chests, fish, light campfires… |
+| C | Camera, for the field guide |
+| Tab / M / Esc | Menu / map / pause |
 
 ## 🗺️ What's in the game
 
@@ -115,25 +128,7 @@ A full day lasts about 8 minutes, with rainstorms, sunsets and starry nights. So
 </tr>
 </table>
 
-<details>
-<summary><b>🎮 Controls</b></summary>
-
-| Key | Action |
-|---|---|
-| WASD / arrow keys | Move (walk into a steep slope to climb) |
-| Mouse | Look around (click to lock, or drag with the right button) · wheel to zoom |
-| Space | Jump · in mid-air: double jump / open the glider (hold) |
-| Shift | Sprint / swim faster |
-| Left click / J | Attack (3-hit combo, plunge attack in mid-air) |
-| Q | Dodge roll (brief invulnerability) |
-| E | Interact: talk, open chests, fish, light campfires… |
-| C | Camera, for the field guide |
-| Tab / M / Esc | Menu / map / pause |
-
-</details>
-
-<details>
-<summary><b>🧰 Project layout & testing</b></summary>
+## 🧰 Project layout
 
 ```
 src/
@@ -146,9 +141,12 @@ src/
   i18n/     English string tables (the Chinese source strings are the keys)
 server/     static server + optional AI chat endpoint
 tools/      headless tests, screenshot tours, i18n checks, trailer recorder
+docs/       Chinese README, design notes, screenshots
 ```
 
-With the server running (`npm start`):
+## 🧪 Testing
+
+Start the server with `npm start`, then:
 
 ```bash
 npm test               # 19 gameplay checks in headless Chromium
@@ -156,13 +154,11 @@ npm run test:combat    # combat and Far Isles checks
 npm run i18n:check     # find untranslated strings
 ```
 
-The trailer recorder in `tools/promo/` drives the game frame by frame on a virtual clock. See the [Chinese README](docs/README.zh-CN.md) for details.
-
-</details>
+The trailer recorder in `tools/promo/` drives the game frame by frame on a virtual clock, so every shot keeps exact timing however slowly it renders. See the [Chinese README](docs/README.zh-CN.md) for details.
 
 ## 📄 License
 
-Released under the [Apache License 2.0](LICENSE).
+Released under the [MIT License](LICENSE).
 
 ## 🙏 Acknowledgements
 

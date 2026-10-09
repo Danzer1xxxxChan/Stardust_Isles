@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.2.0",
   "description": "A cozy 3D exploration & collection game for the browser. Every model, sound and song is generated in code (Three.js).",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Danzer1xxxxChan/Stardust_Isles.git"
