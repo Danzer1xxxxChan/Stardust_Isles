@@ -62,7 +62,7 @@ npm run build
 npm start                      # open http://localhost:8080
 ```
 
-| | |
+| Option | How |
 |---|---|
 | 🌐 Language | **中文 / English** buttons on the title screen, or *Settings → Language* |
 | 🖥️ Graphics | *Settings → Graphics*: Low / Medium / High / Ultra |
